@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Purchase{% endblock %}
+{% block page_title %}Milk Business — Record New Purchase{% endblock %}
+
+{% block content %}
+
+    <div class="card" style="max-width: 480px;">
+
+        {% if form.non_field_errors %}
+            <div style="background:#fef2f2; color:#b91c1c; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Product</label>
+                {{ form.product }}
+                {% if form.product.errors %}
+                    <div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.product.errors.0 }}</div>
+                {% endif %}
+                {% if not form.product.field.queryset.exists %}
+                    <div style="color:#b45309; font-size:12px; margin-top:6px;">
+                        No active products found. <a href="{% url 'milk:product_add' %}">Add a product first.</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Date</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.date.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Number of Bags</label>
+                {{ form.quantity_bags }}
+                {% if form.quantity_bags.errors %}
+                    <div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.quantity_bags.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 22px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Purchase Price per Bag (৳)</label>
+                {{ form.price_per_bag }}
+                {% if form.price_per_bag.errors %}
+                    <div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.price_per_bag.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                    Save Purchase
+                </button>
+                <a href="{% url 'milk:purchase_list' %}" style="background:#e2e8f0; color:#334155; padding:11px 22px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+    </style>
+
+{% endblock %}

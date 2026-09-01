@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from core.models import SiteSettings
-from .models import MilkProduct
-from .forms import MilkProductForm
+from .models import MilkProduct, MilkPurchase
+from .forms import MilkProductForm, MilkPurchaseForm
 
 
 def _base_context(request, active_menu):
@@ -76,3 +77,46 @@ def product_edit_view(request, pk):
     context['is_edit'] = True
     context['product'] = product
     return render(request, 'milk/product_form.html', context)
+@login_required
+def purchase_list_view(request):
+    """
+    Shows all purchase records, most recent first.
+    """
+    purchases = MilkPurchase.objects.select_related('product', 'created_by').all()
+
+    context = _base_context(request, 'milk')
+    context['purchases'] = purchases
+    return render(request, 'milk/purchase_list.html', context)
+
+
+@login_required
+def purchase_add_view(request):
+    """
+    'Milk Purchase' entry form.
+    Saving this form does two things safely together
+    (wrapped in a transaction so both succeed or both fail):
+      1. Creates the MilkPurchase record.
+      2. Stock automatically reflects the new purchase, because
+         stock is calculated live from all Purchase/Sale records
+         (see the Stock view in the next phase) — so no separate
+         stock number needs to be updated manually here.
+    """
+    if request.method == 'POST':
+        form = MilkPurchaseForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                purchase = form.save(commit=False)
+                purchase.created_by = request.user
+                purchase.save()
+            messages.success(
+                request,
+                f'Purchase recorded: {purchase.quantity_bags} bags of '
+                f'{purchase.product.name} — Total ৳{purchase.total_amount}'
+            )
+            return redirect('milk:purchase_list')
+    else:
+        form = MilkPurchaseForm()
+
+    context = _base_context(request, 'milk')
+    context['form'] = form
+    return render(request, 'milk/purchase_form.html', context)
