@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — J.K. GLOBAL PRIVATE LIMITED</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: #1e3a5f;
+            color: #ffffff;
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .topbar-left img {
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .topbar-left .brand-text {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .topbar-left .brand-sub {
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .content {
+            padding: 40px 28px;
+        }
+
+        .welcome-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            max-width: 700px;
+        }
+
+        .welcome-box h1 {
+            font-size: 22px;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .welcome-box p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .role-badge {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .role-admin {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .role-staff {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div class="topbar-left">
+            {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="Logo">
+            {% endif %}
+            <div>
+                <div class="brand-text">{{ site_settings.company_name }}</div>
+                <div class="brand-sub">Managing Director: {{ site_settings.managing_director_name }}</div>
+            </div>
+        </div>
+        <a href="{% url 'accounts:logout' %}" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="welcome-box">
+            <h1>Welcome, {{ request.user.username }} 👋</h1>
+            <p>
+                This is your JK GLOBAL dashboard. In the next steps, this page
+                will show Milk Business stock, today's sales, ticket/visa/passport
+                counts, and expenses — but never Profit here.
+            </p>
+            {% if is_admin %}
+                <span class="role-badge role-admin">ADMIN</span>
+            {% else %}
+                <span class="role-badge role-staff">STAFF</span>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>
