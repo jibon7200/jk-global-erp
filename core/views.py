@@ -19,5 +19,6 @@ def dashboard_view(request):
     context = {
         'site_settings': site_settings,
         'is_admin': request.user.is_admin_role(),
+        'active_menu': 'dashboard',
     }
     return render(request, 'core/dashboard.html', context)

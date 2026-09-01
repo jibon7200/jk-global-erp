@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Milk Products{% endblock %}
+{% block page_title %}Milk Business — Products{% endblock %}
+
+{% block content %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <div style="font-size: 14px; color: #64748b;">
+            Total Products: {{ products.count }}
+        </div>
+        <a href="{% url 'milk:product_add' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            + Add New Product
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        {% if products %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PRODUCT NAME</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">STATUS</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ADDED BY</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ product.name }}</td>
+                        <td style="padding:10px;">
+                            {% if product.is_active %}
+                                <span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Active</span>
+                            {% else %}
+                                <span style="background:#fee2e2; color:#b91c1c; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">
+                            {{ product.created_by.username|default:"—" }}
+                        </td>
+                        <td style="padding:10px;">
+                            <a href="{% url 'milk:product_edit' product.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">
+                No products yet. Click "Add New Product" to create your first one.
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

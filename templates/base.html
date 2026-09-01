@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} — {{ site_settings.company_name }}</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <div class="app-wrapper">
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                {% if site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}" alt="Logo">
+                {% endif %}
+                <div>
+                    <div class="brand-text">{{ site_settings.company_name }}</div>
+                    <div class="brand-sub">MD: {{ site_settings.managing_director_name }}</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'core:dashboard' %}" class="nav-item {% if active_menu == 'dashboard' %}active{% endif %}">
+                    <span class="icon">🏠</span> Dashboard
+                </a>
+
+                <a href="{% url 'milk:product_list' %}" class="nav-item {% if active_menu == 'milk' %}active{% endif %}">
+                    <span class="icon">🥛</span> Milk Business
+                </a>
+
+                <a href="#" class="nav-item {% if active_menu == 'travel' %}active{% endif %}">
+                    <span class="icon">✈️</span> Travel Agency
+                </a>
+
+                <a href="#" class="nav-item {% if active_menu == 'expenses' %}active{% endif %}">
+                    <span class="icon">💳</span> Expenses
+                </a>
+
+                {% if is_admin %}
+                <a href="#" class="nav-item profit-link {% if active_menu == 'profit' %}active{% endif %}">
+                    <span class="icon">💰</span> Profit
+                </a>
+                {% endif %}
+
+                <a href="#" class="nav-item {% if active_menu == 'reports' %}active{% endif %}">
+                    <span class="icon">📊</span> Reports
+                </a>
+
+                <a href="#" class="nav-item {% if active_menu == 'documents' %}active{% endif %}">
+                    <span class="icon">📄</span> Document Editor
+                </a>
+
+                <a href="#" class="nav-item {% if active_menu == 'pdf' %}active{% endif %}">
+                    <span class="icon">📑</span> PDF Editor
+                </a>
+
+                <a href="#" class="nav-item {% if active_menu == 'status' %}active{% endif %}">
+                    <span class="icon">🔍</span> Status Checking
+                </a>
+
+                {% if is_admin %}
+                <a href="#" class="nav-item {% if active_menu == 'users' %}active{% endif %}">
+                    <span class="icon">👥</span> Users
+                </a>
+                {% endif %}
+
+                <a href="#" class="nav-item {% if active_menu == 'settings' %}active{% endif %}">
+                    <span class="icon">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="{% url 'accounts:logout' %}" class="logout-link">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN AREA ================= -->
+        <div class="main-area">
+            <div class="topbar">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+                    <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+                </div>
+                <div class="user-info">
+                    <span>{{ request.user.username }}</span>
+                    {% if is_admin %}
+                        <span class="role-badge role-admin">ADMIN</span>
+                    {% else %}
+                        <span class="role-badge role-staff">STAFF</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Mobile sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        hamburgerBtn.addEventListener('click', function () {
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+        });
+
+        overlay.addEventListener('click', function () {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

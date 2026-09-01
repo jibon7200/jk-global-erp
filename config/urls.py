@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', include('core.urls')),
+    path('milk/', include('milk.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
 ]
 
