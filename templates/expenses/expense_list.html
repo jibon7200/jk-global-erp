@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses{% endblock %}
+{% block page_title %}Expenses{% endblock %}
+
+{% block content %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <div style="font-size: 14px; color: #64748b;">
+            Total Expense Records: {{ expenses.count }}
+        </div>
+        <a href="{% url 'expenses:expense_add' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            + Add New Expense
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        {% if expenses %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">CATEGORY</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">AMOUNT</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">NOTE</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ENTERED BY</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:13px; color:#0f172a;">{{ expense.date|date:"d M Y" }}</td>
+                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ expense.get_category_display }}</td>
+                        <td style="padding:10px; font-size:13px; color:#b91c1c; font-weight:600;">৳{{ expense.amount }}</td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">{{ expense.note|default:"—" }}</td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">{{ expense.created_by.username|default:"—" }}</td>
+                        <td style="padding:10px;">
+                            <a href="{% url 'expenses:expense_edit' expense.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">
+                No expense records yet. Click "Add New Expense" to add your first one.
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

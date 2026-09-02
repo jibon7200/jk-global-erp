@@ -40,7 +40,7 @@
                     <span class="icon">✈️</span> Travel Agency
                 </a>
 
-                <a href="#" class="nav-item {% if active_menu == 'expenses' %}active{% endif %}">
+                <a href="{% url 'expenses:expense_list' %}" class="nav-item {% if active_menu == 'expenses' %}active{% endif %}">
                     <span class="icon">💳</span> Expenses
                 </a>
 

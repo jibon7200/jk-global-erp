@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'core',
     'milk',
     'travel',
+    'expenses',
 ]
 
 MIDDLEWARE = [
