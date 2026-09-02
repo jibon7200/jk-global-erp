@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'milk',
     'travel',
     'expenses',
+    'dues',
 ]
 
 MIDDLEWARE = [

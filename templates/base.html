@@ -44,6 +44,14 @@
                     <span class="icon">💳</span> Expenses
                 </a>
 
+                <a href="{% url 'expenses:expense_list' %}" class="nav-item {% if active_menu == 'expenses' %}active{% endif %}">
+                    <span class="icon">💳</span> Expenses
+                </a>
+
+                <a href="{% url 'dues:customer_list' %}" class="nav-item {% if active_menu == 'dues' %}active{% endif %}">
+                    <span class="icon">🧾</span> বাকি (Due)
+                </a>               
+
                 {% if is_admin %}
                 <a href="{% url 'core:profit' %}" class="nav-item profit-link {% if active_menu == 'profit' %}active{% endif %}">
                     <span class="icon">💰</span> Profit
