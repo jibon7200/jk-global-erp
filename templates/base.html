@@ -62,7 +62,7 @@
                     <span class="icon">📊</span> Reports
                 </a>
 
-                <a href="#" class="nav-item {% if active_menu == 'documents' %}active{% endif %}">
+                <a href="{% url 'documents:document_list' %}" class="nav-item {% if active_menu == 'documents' %}active{% endif %}">
                     <span class="icon">📄</span> Document Editor
                 </a>
 

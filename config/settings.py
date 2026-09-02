@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'expenses',
     'dues',
     'ocr',
+    'documents',
 ]
 
 MIDDLEWARE = [

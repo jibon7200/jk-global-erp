@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Document Editor{% endblock %}
+{% block page_title %}Document Editor — Upload{% endblock %}
+
+{% block content %}
+
+    <div style="margin-bottom:18px;">
+        <a href="{% url 'documents:document_list' %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">View All Documents →</a>
+    </div>
+
+    <div class="card" style="max-width: 500px;">
+        <h2 style="font-size:16px; color:#0f172a; margin-bottom:6px;">Upload a Document Image</h2>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">
+            Supports both Bangla and English text. After upload, the system
+            detects text lines automatically so you can edit them.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="margin-bottom: 22px;">
+                {{ form.image }}
+            </div>
+            <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                Upload &amp; Detect Text
+            </button>
+        </form>
+    </div>
+
+{% endblock %}

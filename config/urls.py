@@ -29,6 +29,7 @@ urlpatterns = [
     path('expenses/', include('expenses.urls')),
     path('dues/', include('dues.urls')),
     path('ocr/', include('ocr.urls')),
+    path('documents/', include('documents.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
 ]
 

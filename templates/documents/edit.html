@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Document{% endblock %}
+{% block page_title %}Document Editor — Edit{% endblock %}
+
+{% block content %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="display:flex; gap:10px; margin-bottom:16px;">
+        <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            💾 Save Changes
+        </button>
+        <a href="{% url 'documents:document_export' doc.pk %}" style="background:#15803d; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            ⬇ Export as PDF (New File)
+        </a>
+        {% if doc.exported_file %}
+        <a href="{{ doc.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            📄 View Last Export
+        </a>
+        {% endif %}
+    </div>
+
+    <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
+        ⚠️ Note: Exported text uses a clean Bangla/English font for correct rendering — it may look slightly different from the original scan's exact font style.
+    </div>
+
+    <div class="card" style="overflow:auto;">
+        <div id="editorContainer" style="position:relative; display:inline-block;">
+            <img src="{{ doc.original_image.url }}" style="display:block; max-width:100%; height:auto;" id="docImage">
+            <div id="overlayLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+        </div>
+    </div>
+
+    <form id="hiddenForm" method="post" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="edited_blocks_json" id="editedBlocksJson">
+    </form>
+
+    <script>
+        const blocks = {{ blocks_json|safe }};
+        const originalWidth = {{ image_width }};
+        const originalHeight = {{ image_height }};
+        const overlayLayer = document.getElementById('overlayLayer');
+        const docImage = document.getElementById('docImage');
+
+        function renderBoxes() {
+            overlayLayer.innerHTML = '';
+            const scaleX = docImage.clientWidth / originalWidth;
+            const scaleY = docImage.clientHeight / originalHeight;
+
+            blocks.forEach((block, index) => {
+                const input = document.createElement('textarea');
+                input.value = block.text;
+                input.dataset.index = index;
+                input.style.position = 'absolute';
+                input.style.left = (block.left * scaleX) + 'px';
+                input.style.top = (block.top * scaleY) + 'px';
+                input.style.width = Math.max(block.width * scaleX, 40) + 'px';
+                input.style.height = Math.max(block.height * scaleY, 18) + 'px';
+                input.style.fontSize = Math.max((block.height * scaleY) * 0.75, 10) + 'px';
+                input.style.border = '1px dashed #3b82f6';
+                input.style.background = 'rgba(255,255,255,0.85)';
+                input.style.resize = 'none';
+                input.style.overflow = 'hidden';
+                input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+                input.addEventListener('input', () => {
+                    blocks[index].text = input.value;
+                });
+                overlayLayer.appendChild(input);
+            });
+        }
+
+        docImage.onload = renderBoxes;
+        if (docImage.complete) renderBoxes();
+        window.addEventListener('resize', renderBoxes);
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            document.getElementById('editedBlocksJson').value = JSON.stringify(blocks);
+            document.getElementById('hiddenForm').submit();
+        });
+    </script>
+
+{% endblock %}
