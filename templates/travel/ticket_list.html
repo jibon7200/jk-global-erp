@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Air Tickets{% endblock %}
+{% block page_title %}Travel Agency — Air Ticket{% endblock %}
+
+{% block content %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <div style="font-size: 14px; color: #64748b;">
+            Total Ticket Records: {{ tickets.count }}
+        </div>
+        <a href="{% url 'travel:ticket_add' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            + Record New Ticket
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        {% if tickets %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PASSENGER NAME</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PASSPORT NO.</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">TICKETS</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">CUSTOMER PAYMENT</th>
+                        {% if is_admin %}
+                        <th style="padding:10px; font-size:12px; color:#64748b;">MY COST</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PROFIT</th>
+                        {% endif %}
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:13px; color:#0f172a;">{{ ticket.date|date:"d M Y" }}</td>
+                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ ticket.passport_holder_name }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ ticket.passport_number }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ ticket.number_of_tickets }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">৳{{ ticket.customer_payment }}</td>
+                        {% if is_admin %}
+                        <td style="padding:10px; font-size:13px; color:#334155;">৳{{ ticket.my_payment }}</td>
+                        <td style="padding:10px; font-size:13px; color:#15803d; font-weight:600;">৳{{ ticket.profit }}</td>
+                        {% endif %}
+                        <td style="padding:10px;">
+                            <a href="{% url 'travel:ticket_edit' ticket.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">
+                No ticket records yet. Click "Record New Ticket" to add your first one.
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

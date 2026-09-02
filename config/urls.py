@@ -25,6 +25,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('core.urls')),
     path('milk/', include('milk.urls')),
+    path('travel/', include('travel.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
 ]
 

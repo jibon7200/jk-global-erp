@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit Ticket{% else %}Add Ticket{% endif %}{% endblock %}
+{% block page_title %}Travel Agency — {% if is_edit %}Edit Ticket{% else %}Record New Ticket{% endif %}{% endblock %}
+
+{% block content %}
+
+    <div class="card" style="max-width: 520px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Date</label>
+                {{ form.date }}
+                {% if form.date.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.date.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Passport Holder Name</label>
+                {{ form.passport_holder_name }}
+                {% if form.passport_holder_name.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.passport_holder_name.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Passport Number</label>
+                {{ form.passport_number }}
+                {% if form.passport_number.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.passport_number.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Number of Tickets</label>
+                {{ form.number_of_tickets }}
+                {% if form.number_of_tickets.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.number_of_tickets.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Customer Payment (৳)</label>
+                {{ form.customer_payment }}
+                {% if form.customer_payment.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.customer_payment.errors.0 }}</div>{% endif %}
+            </div>
+
+            {% if is_admin %}
+            <div style="margin-bottom: 22px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">My Payment/Cost (৳)</label>
+                {{ form.my_payment }}
+                {% if form.my_payment.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.my_payment.errors.0 }}</div>{% endif %}
+                <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Only visible to Admin. Profit is calculated automatically from this and Customer Payment.</div>
+            </div>
+            {% else %}
+                {{ form.my_payment.as_hidden }}
+            {% endif %}
+
+            <div style="display:flex; gap:10px;">
+                <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                    {% if is_edit %}Save Changes{% else %}Save Ticket{% endif %}
+                </button>
+                <a href="{% url 'travel:ticket_list' %}" style="background:#e2e8f0; color:#334155; padding:11px 22px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+    </style>
+
+{% endblock %}
