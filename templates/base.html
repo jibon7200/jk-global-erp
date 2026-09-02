@@ -45,7 +45,7 @@
                 </a>
 
                 {% if is_admin %}
-                <a href="#" class="nav-item profit-link {% if active_menu == 'profit' %}active{% endif %}">
+                <a href="{% url 'core:profit' %}" class="nav-item profit-link {% if active_menu == 'profit' %}active{% endif %}">
                     <span class="icon">💰</span> Profit
                 </a>
                 {% endif %}

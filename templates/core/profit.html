@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Profit{% endblock %}
+{% block page_title %}Total Business Profit{% endblock %}
+
+{% block content %}
+
+    <!-- Date Filter Buttons -->
+    <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+        <a href="?filter=today" style="background:{% if filter_label == 'Today' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if filter_label == 'Today' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Today</a>
+        <a href="?filter=yesterday" style="background:{% if filter_label == 'Yesterday' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if filter_label == 'Yesterday' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Yesterday</a>
+        <a href="?filter=this_month" style="background:{% if filter_label == 'This Month' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if filter_label == 'This Month' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">This Month</a>
+        <a href="?filter=last_month" style="background:{% if filter_label == 'Last Month' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if filter_label == 'Last Month' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Last Month</a>
+        <a href="?filter=this_year" style="background:{% if filter_label == 'This Year' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if filter_label == 'This Year' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">This Year</a>
+    </div>
+
+    <!-- Custom Date Range Form -->
+    <form method="get" style="display:flex; gap:10px; align-items:center; margin-bottom:24px; flex-wrap:wrap;">
+        <input type="hidden" name="filter" value="custom">
+        <input type="date" name="start_date" value="{% if filter_label == 'Custom Range' %}{{ start_date|date:'Y-m-d' }}{% endif %}" style="padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:13px;">
+        <span style="color:#64748b; font-size:13px;">to</span>
+        <input type="date" name="end_date" value="{% if filter_label == 'Custom Range' %}{{ end_date|date:'Y-m-d' }}{% endif %}" style="padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:13px;">
+        <button type="submit" style="background:#334155; color:#fff; border:none; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">Apply Custom Range</button>
+    </form>
+
+    <div style="font-size:13px; color:#64748b; margin-bottom:20px;">
+        Showing: <strong>{{ filter_label }}</strong> ({{ start_date|date:"d M Y" }} — {{ end_date|date:"d M Y" }})
+    </div>
+
+    <!-- Profit Breakdown Cards -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">🥛 MILK BUSINESS PROFIT</div>
+            <div style="font-size:24px; font-weight:700; color:{% if milk_profit >= 0 %}#15803d{% else %}#b91c1c{% endif %};">৳{{ milk_profit|floatformat:2 }}</div>
+        </div>
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">✈️ TICKET PROFIT</div>
+            <div style="font-size:24px; font-weight:700; color:{% if ticket_profit >= 0 %}#15803d{% else %}#b91c1c{% endif %};">৳{{ ticket_profit|floatformat:2 }}</div>
+        </div>
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">🛂 VISA PROFIT</div>
+            <div style="font-size:24px; font-weight:700; color:{% if visa_profit >= 0 %}#15803d{% else %}#b91c1c{% endif %};">৳{{ visa_profit|floatformat:2 }}</div>
+        </div>
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">📘 PASSPORT PROFIT</div>
+            <div style="font-size:24px; font-weight:700; color:{% if passport_profit >= 0 %}#15803d{% else %}#b91c1c{% endif %};">৳{{ passport_profit|floatformat:2 }}</div>
+        </div>
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">👷 MANPOWER PROFIT</div>
+            <div style="font-size:24px; font-weight:700; color:{% if manpower_profit >= 0 %}#15803d{% else %}#b91c1c{% endif %};">৳{{ manpower_profit|floatformat:2 }}</div>
+        </div>
+
+        <div class="card">
+            <div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:6px;">💳 TOTAL EXPENSES</div>
+            <div style="font-size:24px; font-weight:700; color:#b91c1c;">−৳{{ total_expenses|floatformat:2 }}</div>
+        </div>
+
+    </div>
+
+    <!-- Combined Total -->
+    <div class="card" style="background:#0f172a; color:#ffffff;">
+        <div style="font-size:14px; color:#94a3b8; font-weight:600; margin-bottom:8px;">💰 TOTAL BUSINESS PROFIT</div>
+        <div style="font-size:36px; font-weight:800; color:{% if total_business_profit >= 0 %}#4ade80{% else %}#f87171{% endif %};">
+            ৳{{ total_business_profit|floatformat:2 }}
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-top:6px;">
+            {{ filter_label }} ({{ start_date|date:"d M Y" }} — {{ end_date|date:"d M Y" }})
+        </div>
+    </div>
+
+{% endblock %}
