@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Milk Sales{% endblock %}
+{% block page_title %}Milk Business — Sale History{% endblock %}
+
+{% block content %}
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <a href="{% url 'milk:product_list' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Products</a>
+        <a href="{% url 'milk:purchase_list' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Purchase</a>
+        <a href="{% url 'milk:sale_list' %}" style="background:#1e3a5f; color:#fff; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Sale</a>
+        <a href="{% url 'milk:stock' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Stock</a>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <div style="font-size: 14px; color: #64748b;">
+            Total Sale Records: {{ sales.count }}
+        </div>
+        <a href="{% url 'milk:sale_add' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            + Record New Sale
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <div style="background:#fef2f2; color:#b91c1c; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        {% if sales %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PRODUCT</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">BAGS</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PRICE/BAG</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">TOTAL</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ENTERED BY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:13px; color:#0f172a;">{{ sale.date|date:"d M Y" }}</td>
+                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ sale.product.name }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ sale.quantity_bags }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">৳{{ sale.price_per_bag }}</td>
+                        <td style="padding:10px; font-size:13px; color:#15803d; font-weight:600;">৳{{ sale.total_amount }}</td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">{{ sale.created_by.username|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">
+                No sale records yet. Click "Record New Sale" to add your first one.
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

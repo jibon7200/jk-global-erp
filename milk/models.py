@@ -103,3 +103,60 @@ class MilkPurchase(models.Model):
         verbose_name = "Milk Purchase"
         verbose_name_plural = "Milk Purchases"
         ordering = ['-date', '-created_at']        
+class MilkSale(models.Model):
+    """
+    Records every time Jibon sells milk powder bags to a customer.
+    Stock validation prevents selling more bags than are currently
+    available (checked in the view before saving).
+    """
+
+    product = models.ForeignKey(
+        MilkProduct,
+        on_delete=models.PROTECT,
+        related_name='sales',
+        help_text="Which product was sold."
+    )
+
+    date = models.DateField()
+
+    quantity_bags = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
+        help_text="Number of 25 KG bags sold."
+    )
+
+    price_per_bag = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+        help_text="Selling price per bag in BDT."
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        editable=False,
+        help_text="Automatically calculated: quantity_bags x price_per_bag."
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='milk_sales_created'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.total_amount = Decimal(self.quantity_bags) * self.price_per_bag
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} — {self.quantity_bags} bags on {self.date}"
+
+    class Meta:
+        verbose_name = "Milk Sale"
+        verbose_name_plural = "Milk Sales"
+        ordering = ['-date', '-created_at']

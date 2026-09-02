@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Milk Stock{% endblock %}
+{% block page_title %}Milk Business — Current Stock{% endblock %}
+
+{% block content %}
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <a href="{% url 'milk:product_list' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Products</a>
+        <a href="{% url 'milk:purchase_list' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Purchase</a>
+        <a href="{% url 'milk:sale_list' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Sale</a>
+        <a href="{% url 'milk:stock' %}" style="background:#1e3a5f; color:#fff; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Stock</a>
+    </div>
+
+    <div class="card">
+        {% if stock_data %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PRODUCT</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">TOTAL PURCHASED</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">TOTAL SOLD</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">AVAILABLE STOCK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in stock_data %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ row.product.name }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ row.total_purchased }} bags</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ row.total_sold }} bags</td>
+                        <td style="padding:10px; font-size:14px; font-weight:700;">
+                            {% if row.available <= 0 %}
+                                <span style="color:#b91c1c;">{{ row.available }} bags</span>
+                            {% elif row.available <= 5 %}
+                                <span style="color:#b45309;">{{ row.available }} bags</span>
+                            {% else %}
+                                <span style="color:#15803d;">{{ row.available }} bags</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">
+                No products added yet.
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}
