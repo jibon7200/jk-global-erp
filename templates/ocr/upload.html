@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Passport OCR Scan{% endblock %}
+{% block page_title %}Status Checking — Passport OCR{% endblock %}
+
+{% block content %}
+
+    <div style="margin-bottom:18px;">
+        <a href="{% url 'ocr:scan_list' %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">View Scan History →</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card" style="max-width: 500px;">
+        <h2 style="font-size:16px; color:#0f172a; margin-bottom:6px;">Upload Passport Image</h2>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">
+            Upload a clear photo of the passport bio-data page. The system will try
+            to read the machine-readable zone (MRZ) automatically. You will always
+            get a chance to review and correct the data before it's saved.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 22px;">
+                {{ form.image }}
+                {% if form.image.errors %}<div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.image.errors.0 }}</div>{% endif %}
+            </div>
+
+            <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                Upload &amp; Scan
+            </button>
+        </form>
+    </div>
+
+{% endblock %}

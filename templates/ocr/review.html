@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Scan{% endblock %}
+{% block page_title %}Status Checking — Review Extracted Data{% endblock %}
+
+{% block content %}
+
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+        <div class="card" style="flex:1; min-width:260px; max-width:340px;">
+            <h3 style="font-size:14px; color:#0f172a; margin-bottom:12px;">Uploaded Image</h3>
+            <img src="{{ scan.image.url }}" alt="Passport scan" style="width:100%; border-radius:8px; border:1px solid #e2e8f0;">
+
+            {% if not scan.extraction_successful %}
+                <div style="background:#fef3c7; color:#92400e; padding:10px 12px; border-radius:8px; margin-top:14px; font-size:12px;">
+                    ⚠️ Automatic MRZ detection did not succeed for this image. Please fill in the fields manually.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card" style="flex:1; min-width:280px;">
+            <h3 style="font-size:14px; color:#0f172a; margin-bottom:4px;">Review &amp; Confirm Details</h3>
+            <p style="font-size:12px; color:#94a3b8; margin-bottom:16px;">
+                Please check every field carefully against the passport before confirming.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Full Name</label>
+                    {{ form.full_name }}
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Passport Number</label>
+                    {{ form.passport_number }}
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Nationality</label>
+                    {{ form.nationality }}
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Date of Expiry</label>
+                    {{ form.date_of_expiry }}
+                </div>
+
+                <div style="margin-bottom: 22px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Sex</label>
+                    {{ form.sex }}
+                </div>
+
+                <button type="submit" style="background:#15803d; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                    ✓ Confirm &amp; Save
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <style>
+        .form-input { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; }
+        .form-input:focus { outline: none; border-color: #1e3a5f; }
+    </style>
+
+{% endblock %}

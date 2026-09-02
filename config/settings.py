@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'travel',
     'expenses',
     'dues',
+    'ocr',
 ]
 
 MIDDLEWARE = [
@@ -150,4 +151,11 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'core:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
+# ============================================
+# OCR Configuration (Free — Tesseract OCR)
+# ============================================
+TESSERACT_CMD_PATH = config(
+    'TESSERACT_CMD_PATH',
+    default=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+)
 
