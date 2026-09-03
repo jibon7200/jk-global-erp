@@ -161,3 +161,7 @@ TESSERACT_CMD_PATH = config(
     default=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 )
 
+# ============================================
+# AI Configuration (Free — Google Gemini)
+# ============================================
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')

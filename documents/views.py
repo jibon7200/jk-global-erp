@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.core.files.base import ContentFile
+from django.views.decorators.http import require_POST
+from core.ai_helper import ask_ai
 from django.core.files.storage import default_storage
 
 import pytesseract
@@ -196,3 +199,25 @@ def document_list_view(request):
     context = _base_context(request, 'documents')
     context['documents'] = documents
     return render(request, 'documents/document_list.html', context)
+
+@login_required
+@require_POST
+def document_ai_assist_view(request, pk):
+    """
+    AJAX endpoint: sends the user's instruction (and optionally
+    existing text) to Gemini, returns the suggested text as JSON.
+    The frontend then lets the user review it and manually insert
+    it into any text box — nothing is auto-applied.
+    """
+    doc = get_object_or_404(DocumentEdit, pk=pk)
+    instruction = request.POST.get('instruction', '').strip()
+    context_text = request.POST.get('context_text', '').strip()
+
+    if not instruction:
+        return JsonResponse({'success': False, 'error': 'Please enter an instruction.'}, status=400)
+
+    try:
+        result_text = ask_ai(instruction, context_text)
+        return JsonResponse({'success': True, 'result': result_text})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -36,11 +36,13 @@
             ⬜ Cover/Erase Box
         </button>
 
-
-
         <button id="addTextBtn" style="background:#0891b2; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
             🅰 Add Text
-        </button>       
+        </button>
+
+        <button id="aiAssistBtn" style="background:linear-gradient(135deg, #7c3aed, #2563eb); color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            ✨ Ask AI
+        </button>
 
         <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
 
@@ -51,7 +53,7 @@
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
-        ⚠️ Tip: Use Zoom to work more precisely. Click a text box to edit it, click an added image/cover box to move, resize, or delete it (× button appears on the box).
+        ⚠️ Tip: Use Zoom to work more precisely. Click a text box to edit it, click an added image/cover/text box to move, resize, or delete it. Use "Cover" to hide original text before editing.
     </div>
 
     <!-- Scrollable editor area -->
@@ -61,6 +63,43 @@
                 <img src="{{ doc.original_image.url }}" style="display:block;" id="docImage">
                 <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                 <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assist Panel -->
+    <div id="aiPanel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:14px; padding:26px; width:90%; max-width:520px; max-height:85vh; overflow-y:auto;">
+            <h3 style="font-size:16px; color:#0f172a; margin-bottom:14px;">✨ Ask AI (Google Gemini)</h3>
+
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
+                What do you want AI to do?
+            </label>
+            <textarea id="aiInstruction" placeholder="e.g. Write a formal paragraph about our milk business growth in Bangla" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
+                Existing text to work with (optional)
+            </label>
+            <textarea id="aiContextText" placeholder="Paste or type existing text here if you want AI to rewrite/improve it" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+
+            <button id="aiGenerateBtn" type="button" style="background:#7c3aed; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                Generate
+            </button>
+
+            <div id="aiLoading" style="display:none; font-size:12px; color:#64748b; margin-top:10px;">Thinking...</div>
+            <div id="aiError" style="display:none; background:#fef2f2; color:#b91c1c; padding:10px; border-radius:8px; font-size:12px; margin-top:10px;"></div>
+
+            <div id="aiResultBox" style="display:none; margin-top:14px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Result:</label>
+                <textarea id="aiResultText" style="width:100%; height:100px; padding:10px; border:1.5px solid #7c3aed; border-radius:8px; font-size:13px; font-family:'Noto Sans Bengali', Arial, sans-serif;"></textarea>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button id="aiInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                        + Insert as New Text Box
+                    </button>
+                    <button id="aiCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -77,6 +116,7 @@
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
         const uploadUrl = "{% url 'documents:element_image_upload' doc.pk %}";
+        const aiAssistUrl = "{% url 'documents:document_ai_assist' doc.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         const textLayer = document.getElementById('textLayer');
@@ -140,7 +180,6 @@
                 input.style.padding = '1px';
                 input.addEventListener('input', () => { blocks[index].text = input.value; });
 
-                // Cover ON/OFF toggle button
                 const coverToggle = document.createElement('button');
                 coverToggle.type = 'button';
                 coverToggle.textContent = block.covered ? '👁 Covered' : '⬜ Cover';
@@ -157,7 +196,6 @@
                     colorPicker.style.display = blocks[index].covered ? 'block' : 'none';
                 });
 
-                // Color picker — only meaningful once "Cover" is turned on
                 const colorPicker = document.createElement('input');
                 colorPicker.type = 'color';
                 colorPicker.value = block.color;
@@ -184,6 +222,7 @@
 
             el.addEventListener('mousedown', (e) => {
                 if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-handle')) return;
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 isDragging = true;
                 startX = e.clientX; startY = e.clientY;
                 startLeft = parseFloat(el.style.left);
@@ -265,6 +304,8 @@
                     });
                     box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
+                    box.style.border = '1px dashed #0891b2';
+                    box.style.background = 'rgba(255,255,255,0.6)';
 
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
@@ -283,7 +324,6 @@
                     textInput.addEventListener('input', () => { elData.text = textInput.value; });
                     box.appendChild(textInput);
 
-                    // Small font-size controls for this text box
                     const fontControls = document.createElement('div');
                     fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:3px; background:#0891b2; border-radius:5px; padding:2px;';
 
@@ -355,7 +395,6 @@
         if (docImage.complete) renderAll();
         window.addEventListener('resize', renderAll);
 
-        // Add Image
         document.getElementById('addImageBtn').addEventListener('click', () => {
             document.getElementById('imageFileInput').click();
         });
@@ -375,11 +414,7 @@
             const data = await response.json();
 
             if (data.success) {
-                elements.push({
-                    type: 'image',
-                    src: data.url,
-                    left: 50, top: 50, width: 150, height: 150,
-                });
+                elements.push({ type: 'image', src: data.url, left: 50, top: 50, width: 150, height: 150 });
                 renderElements();
             } else {
                 alert('Image upload failed.');
@@ -387,34 +422,78 @@
             e.target.value = '';
         });
 
-        // Add Cover/Erase Box
         document.getElementById('addCoverBtn').addEventListener('click', () => {
-            elements.push({
-                type: 'cover',
-                left: 50, top: 50, width: 150, height: 60,
-                color: '#ffffff',
-            });
-            renderElements();
-        });
-                // Add Cover/Erase Box
-        document.getElementById('addCoverBtn').addEventListener('click', () => {
-            elements.push({
-                type: 'cover',
-                left: 50, top: 50, width: 150, height: 60,
-            });
+            elements.push({ type: 'cover', left: 50, top: 50, width: 150, height: 60, color: '#ffffff' });
             renderElements();
         });
 
-        // Add Text Box
         document.getElementById('addTextBtn').addEventListener('click', () => {
-            elements.push({
-                type: 'text',
-                text: '',
-                left: 50, top: 50, width: 180, height: 40,
-                font_size: 16,
-                color: '#000000',
-            });
+            elements.push({ type: 'text', text: '', left: 50, top: 50, width: 180, height: 40, font_size: 16, color: '#000000' });
             renderElements();
+        });
+
+        // AI Assist Panel
+        document.getElementById('aiAssistBtn').addEventListener('click', () => {
+            document.getElementById('aiPanel').style.display = 'flex';
+        });
+
+        document.getElementById('aiCloseBtn').addEventListener('click', () => {
+            document.getElementById('aiPanel').style.display = 'none';
+            document.getElementById('aiResultBox').style.display = 'none';
+            document.getElementById('aiError').style.display = 'none';
+        });
+
+        document.getElementById('aiGenerateBtn').addEventListener('click', async () => {
+            const instruction = document.getElementById('aiInstruction').value.trim();
+            const contextText = document.getElementById('aiContextText').value.trim();
+            const errorBox = document.getElementById('aiError');
+            const loadingBox = document.getElementById('aiLoading');
+            const resultBox = document.getElementById('aiResultBox');
+
+            errorBox.style.display = 'none';
+            resultBox.style.display = 'none';
+
+            if (!instruction) {
+                errorBox.textContent = 'Please enter an instruction.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            loadingBox.style.display = 'block';
+
+            const formData = new URLSearchParams();
+            formData.append('instruction', instruction);
+            formData.append('context_text', contextText);
+
+            try {
+                const response = await fetch(aiAssistUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData,
+                });
+                const data = await response.json();
+                loadingBox.style.display = 'none';
+
+                if (data.success) {
+                    document.getElementById('aiResultText').value = data.result;
+                    resultBox.style.display = 'block';
+                } else {
+                    errorBox.textContent = data.error || 'Something went wrong.';
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                loadingBox.style.display = 'none';
+                errorBox.textContent = 'Network error. Please try again.';
+                errorBox.style.display = 'block';
+            }
+        });
+
+        document.getElementById('aiInsertBtn').addEventListener('click', () => {
+            const resultText = document.getElementById('aiResultText').value;
+            elements.push({ type: 'text', text: resultText, left: 50, top: 50, width: 220, height: 60, font_size: 16, color: '#000000' });
+            renderElements();
+            document.getElementById('aiPanel').style.display = 'none';
+            document.getElementById('aiResultBox').style.display = 'none';
         });
 
         // Save
