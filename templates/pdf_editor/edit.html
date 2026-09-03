@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit PDF{% endblock %}
+{% block page_title %}PDF Editor — Edit Pages{% endblock %}
+
+{% block content %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center;">
+        <button id="mergeMoreBtn" style="background:#7c3aed; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            🔗 Add More Files (Merge)
+        </button>
+        <input type="file" id="mergeFileInput" multiple accept="application/pdf" style="display:none;">
+
+        <a href="{% url 'pdf_editor:project_export' project.pk %}" style="background:#15803d; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            ⬇ Export Final PDF
+        </a>
+
+        {% if project.exported_file %}
+        <a href="{{ project.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            📄 View Last Export
+        </a>
+        {% endif %}
+
+        <span id="pageCount" style="font-size:13px; color:#64748b; margin-left:auto;"></span>
+    </div>
+
+    <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
+        ⚠️ Drag a page to reorder it. Use the rotate/delete buttons on each page. Changes save automatically.
+    </div>
+
+    <div id="pageGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:16px;"></div>
+
+    <form id="mergeForm" method="post" action="{% url 'pdf_editor:project_add_files' project.pk %}" enctype="multipart/form-data" style="display:none;">
+        {% csrf_token %}
+        <input type="file" name="files" id="mergeFilesActual" multiple>
+    </form>
+
+    <script>
+        let pages = {{ project.pages|safe|default:"[]" }};
+        const pageGrid = document.getElementById('pageGrid');
+        const saveStateUrl = "{% url 'pdf_editor:project_save_state' project.pk %}";
+        const thumbBaseUrl = "/pdf/thumbnail/";
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let draggedIndex = null;
+
+        function updatePageCount() {
+            document.getElementById('pageCount').textContent = pages.length + ' page(s)';
+        }
+
+        async function saveState() {
+            await fetch(saveStateUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'pages_json=' + encodeURIComponent(JSON.stringify(pages)),
+            });
+        }
+
+        function renderPages() {
+            pageGrid.innerHTML = '';
+            updatePageCount();
+
+            pages.forEach((page, index) => {
+                const card = document.createElement('div');
+                card.draggable = true;
+                card.dataset.index = index;
+                card.style.cssText = 'background:#fff; border:2px solid #e2e8f0; border-radius:10px; padding:8px; cursor:move; text-align:center;';
+
+                const thumbWrapper = document.createElement('div');
+                thumbWrapper.style.cssText = 'overflow:hidden; border-radius:6px; margin-bottom:6px; background:#f1f5f9;';
+
+                const img = document.createElement('img');
+                img.src = `${thumbBaseUrl}${page.source_file_id}/${page.page_number}/?rotation=${page.rotation}&t=${Date.now()}`;
+                img.style.cssText = 'width:100%; display:block;';
+                thumbWrapper.appendChild(img);
+                card.appendChild(thumbWrapper);
+
+                const label = document.createElement('div');
+                label.textContent = `Page ${index + 1}`;
+                label.style.cssText = 'font-size:11px; color:#64748b; margin-bottom:6px; font-weight:600;';
+                card.appendChild(label);
+
+                const controls = document.createElement('div');
+                controls.style.cssText = 'display:flex; gap:4px; justify-content:center;';
+
+                const rotateBtn = document.createElement('button');
+                rotateBtn.textContent = '↻';
+                rotateBtn.title = 'Rotate 90°';
+                rotateBtn.style.cssText = 'background:#e2e8f0; border:none; border-radius:5px; width:28px; height:28px; cursor:pointer; font-size:14px;';
+                rotateBtn.addEventListener('click', async () => {
+                    pages[index].rotation = (pages[index].rotation + 90) % 360;
+                    await saveState();
+                    renderPages();
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '🗑';
+                deleteBtn.title = 'Delete this page';
+                deleteBtn.style.cssText = 'background:#fee2e2; border:none; border-radius:5px; width:28px; height:28px; cursor:pointer; font-size:12px;';
+                deleteBtn.addEventListener('click', async () => {
+                    if (confirm('Delete this page from the project?')) {
+                        pages.splice(index, 1);
+                        await saveState();
+                        renderPages();
+                    }
+                });
+
+                controls.appendChild(rotateBtn);
+                controls.appendChild(deleteBtn);
+                card.appendChild(controls);
+
+                card.addEventListener('dragstart', () => { draggedIndex = index; card.style.opacity = '0.4'; });
+                card.addEventListener('dragend', () => { card.style.opacity = '1'; });
+                card.addEventListener('dragover', (e) => e.preventDefault());
+                card.addEventListener('drop', async () => {
+                    if (draggedIndex === null || draggedIndex === index) return;
+                    const moved = pages.splice(draggedIndex, 1)[0];
+                    pages.splice(index, 0, moved);
+                    draggedIndex = null;
+                    await saveState();
+                    renderPages();
+                });
+
+                pageGrid.appendChild(card);
+            });
+        }
+
+        renderPages();
+
+        document.getElementById('mergeMoreBtn').addEventListener('click', () => {
+            document.getElementById('mergeFileInput').click();
+        });
+
+        document.getElementById('mergeFileInput').addEventListener('change', (e) => {
+            const dt = new DataTransfer();
+            for (const file of e.target.files) dt.items.add(file);
+            document.getElementById('mergeFilesActual').files = dt.files;
+            document.getElementById('mergeForm').submit();
+        });
+    </script>
+
+{% endblock %}

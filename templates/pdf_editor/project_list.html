@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}PDF Projects{% endblock %}
+{% block page_title %}PDF Editor — All Projects{% endblock %}
+
+{% block content %}
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="font-size:14px; color:#64748b;">Total Projects: {{ projects.count }}</div>
+        <a href="{% url 'pdf_editor:project_create' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            + New PDF Project
+        </a>
+    </div>
+
+    <div class="card">
+        {% if projects %}
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ID</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">PAGES</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">CREATED BY</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">EXPORTED?</th>
+                        <th style="padding:10px; font-size:12px; color:#64748b;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:10px; font-size:13px;">#{{ project.pk }}</td>
+                        <td style="padding:10px; font-size:13px; color:#334155;">{{ project.pages|length }}</td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">{{ project.created_by.username|default:"—" }}</td>
+                        <td style="padding:10px; font-size:13px; color:#64748b;">{{ project.created_at|date:"d M Y" }}</td>
+                        <td style="padding:10px;">
+                            {% if project.exported_file %}
+                                <span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Yes</span>
+                            {% else %}
+                                <span style="background:#f1f5f9; color:#64748b; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">No</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px;">
+                            <a href="{% url 'pdf_editor:project_edit' project.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">Open</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">No PDF projects yet.</p>
+        {% endif %}
+    </div>
+
+{% endblock %}

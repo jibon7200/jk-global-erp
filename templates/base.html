@@ -80,8 +80,8 @@
                 </a>
                 {% endif %}
 
-                <a href="#" class="nav-item {% if active_menu == 'settings' %}active{% endif %}">
-                    <span class="icon">⚙️</span> Settings
+                <a href="{% url 'pdf_editor:project_list' %}" class="nav-item {% if active_menu == 'pdf' %}active{% endif %}">
+                    <span class="icon">📑</span> PDF Editor
                 </a>
             </nav>
 

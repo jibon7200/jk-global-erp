@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'dues',
     'ocr',
     'documents',
+    'pdf_editor',
 ]
 
 MIDDLEWARE = [
