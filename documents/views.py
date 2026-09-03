@@ -72,6 +72,8 @@ def _extract_text_blocks(image_path):
             'top': line['top'],
             'width': line['right'] - line['left'],
             'height': line['bottom'] - line['top'],
+            'color': '#ffffff',
+            'covered': False,
         })
 
     return blocks, image.width, image.height

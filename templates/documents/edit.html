@@ -117,21 +117,64 @@
             const scale = getScale();
 
             blocks.forEach((block, index) => {
+                if (!block.color) block.color = '#ffffff';
+                if (block.covered === undefined) block.covered = false;
+
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'absolute';
+                wrapper.style.left = (block.left * scale.x) + 'px';
+                wrapper.style.top = (block.top * scale.y) + 'px';
+                wrapper.style.width = Math.max(block.width * scale.x, 40) + 'px';
+                wrapper.style.height = Math.max(block.height * scale.y, 18) + 'px';
+
                 const input = document.createElement('textarea');
                 input.value = block.text;
-                input.style.position = 'absolute';
-                input.style.left = (block.left * scale.x) + 'px';
-                input.style.top = (block.top * scale.y) + 'px';
-                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
-                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
+                input.style.width = '100%';
+                input.style.height = '100%';
                 input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
                 input.style.border = '1px dashed #3b82f6';
-                input.style.background = 'rgba(255,255,255,0.85)';
+                input.style.background = block.covered ? block.color : 'transparent';
                 input.style.resize = 'none';
                 input.style.overflow = 'hidden';
                 input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+                input.style.padding = '1px';
                 input.addEventListener('input', () => { blocks[index].text = input.value; });
-                textLayer.appendChild(input);
+
+                // Cover ON/OFF toggle button
+                const coverToggle = document.createElement('button');
+                coverToggle.type = 'button';
+                coverToggle.textContent = block.covered ? '👁 Covered' : '⬜ Cover';
+                coverToggle.title = 'Click to cover/uncover this line with a background color';
+                coverToggle.style.cssText = `position:absolute; top:-24px; left:0; font-size:10px; padding:2px 6px; border:none; border-radius:4px; cursor:pointer; z-index:5; background:${block.covered ? '#0891b2' : '#e2e8f0'}; color:${block.covered ? '#fff' : '#334155'};`;
+                coverToggle.addEventListener('mousedown', (e) => e.stopPropagation());
+                coverToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    blocks[index].covered = !blocks[index].covered;
+                    input.style.background = blocks[index].covered ? blocks[index].color : 'transparent';
+                    coverToggle.textContent = blocks[index].covered ? '👁 Covered' : '⬜ Cover';
+                    coverToggle.style.background = blocks[index].covered ? '#0891b2' : '#e2e8f0';
+                    coverToggle.style.color = blocks[index].covered ? '#fff' : '#334155';
+                    colorPicker.style.display = blocks[index].covered ? 'block' : 'none';
+                });
+
+                // Color picker — only meaningful once "Cover" is turned on
+                const colorPicker = document.createElement('input');
+                colorPicker.type = 'color';
+                colorPicker.value = block.color;
+                colorPicker.title = 'Cover color for this text line';
+                colorPicker.style.cssText = `position:absolute; top:-24px; left:62px; width:26px; height:18px; border:none; padding:0; cursor:pointer; z-index:5; display:${block.covered ? 'block' : 'none'};`;
+                colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                colorPicker.addEventListener('input', (e) => {
+                    blocks[index].color = e.target.value;
+                    if (blocks[index].covered) {
+                        input.style.background = e.target.value;
+                    }
+                });
+
+                wrapper.appendChild(coverToggle);
+                wrapper.appendChild(colorPicker);
+                wrapper.appendChild(input);
+                textLayer.appendChild(wrapper);
             });
         }
 

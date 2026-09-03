@@ -22,7 +22,6 @@
     }
     .text-block {
         position: absolute;
-        background: white;
         white-space: pre-wrap;
         line-height: 1.1;
     }
@@ -34,7 +33,7 @@
 
         {% for element in elements %}
             {% if element.type == 'cover' %}
-                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:white;"></div>
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:{{ element.color|default:"white" }};"></div>
             {% elif element.type == 'image' %}
                 <img src="{{ element.src }}" style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; object-fit:contain;">
             {% elif element.type == 'text' %}
@@ -43,7 +42,7 @@
         {% endfor %}
 
         {% for block in blocks %}
-        <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
+        <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px; {% if block.covered %}background:{{ block.color|default:"white" }};{% endif %}">
             {{ block.text }}
         </div>
         {% endfor %}
