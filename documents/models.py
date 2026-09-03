@@ -29,6 +29,19 @@ class DocumentEdit(models.Model):
         null=True,
         help_text="The saved edited copy, once exported."
     )
+    exported_file = models.FileField(
+        upload_to='documents/exports/',
+        blank=True,
+        null=True,
+        help_text="The saved edited copy, once exported."
+    )
+
+    added_elements = models.JSONField(
+        default=list,
+        help_text="List of images/cover-boxes added during editing: "
+                   "{type: 'image'|'cover', src, left, top, width, height} "
+                   "in ORIGINAL image pixel coordinates."
+    )
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

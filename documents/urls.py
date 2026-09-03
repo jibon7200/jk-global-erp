@@ -8,4 +8,5 @@ urlpatterns = [
     path('upload/', views.document_upload_view, name='document_upload'),
     path('<int:pk>/edit/', views.document_edit_view, name='document_edit'),
     path('<int:pk>/export/', views.document_export_view, name='document_export'),
+    path('<int:pk>/upload-element/', views.element_image_upload_view, name='element_image_upload'),
 ]

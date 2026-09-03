@@ -31,6 +31,15 @@
 <body>
     <div class="page">
         <img src="{{ image_url }}">
+
+        {% for element in elements %}
+            {% if element.type == 'cover' %}
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:white;"></div>
+            {% elif element.type == 'image' %}
+                <img src="{{ element.src }}" style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; object-fit:contain;">
+            {% endif %}
+        {% endfor %}
+
         {% for block in blocks %}
         <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
             {{ block.text }}

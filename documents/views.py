@@ -2,9 +2,11 @@ import json
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 import pytesseract
 from PIL import Image
@@ -107,17 +109,19 @@ def document_upload_view(request):
 @login_required
 def document_edit_view(request, pk):
     """
-    Step 2: Shows the uploaded image with editable text boxes
-    positioned exactly where OCR found each line. The user can
-    change any line's text; layout position is preserved.
+    Step 2: Shows the uploaded image with editable text boxes,
+    plus any added images/cover-boxes, positioned exactly where
+    they belong in the original image's coordinate space.
     """
     doc = get_object_or_404(DocumentEdit, pk=pk)
     image = Image.open(doc.original_image.path)
 
     if request.method == 'POST':
         edited_json = request.POST.get('edited_blocks_json', '[]')
+        elements_json = request.POST.get('added_elements_json', '[]')
         try:
             doc.edited_blocks = json.loads(edited_json)
+            doc.added_elements = json.loads(elements_json)
             doc.save()
             messages.success(request, 'Changes saved. You can now export this as a new file.')
         except json.JSONDecodeError:
@@ -129,7 +133,29 @@ def document_edit_view(request, pk):
     context['image_width'] = image.width
     context['image_height'] = image.height
     context['blocks_json'] = json.dumps(doc.edited_blocks)
+    context['elements_json'] = json.dumps(doc.added_elements)
     return render(request, 'documents/edit.html', context)
+
+
+@login_required
+def element_image_upload_view(request, pk):
+    """
+    AJAX endpoint used by the editor page: uploads a new image the
+    user wants to place onto the document (e.g. a passport photo
+    added to a CV), and returns its URL so JavaScript can display it.
+    """
+    doc = get_object_or_404(DocumentEdit, pk=pk)
+
+    if request.method == 'POST' and request.FILES.get('image'):
+        uploaded_file = request.FILES['image']
+        path = default_storage.save(
+            f'documents/elements/{doc.pk}/{uploaded_file.name}',
+            uploaded_file
+        )
+        url = default_storage.url(path)
+        return JsonResponse({'success': True, 'url': url})
+
+    return JsonResponse({'success': False, 'error': 'No image provided.'}, status=400)
 
 
 @login_required
@@ -147,6 +173,7 @@ def document_export_view(request, pk):
     html_string = render_to_string('documents/export_template.html', {
         'image_url': request.build_absolute_uri(doc.original_image.url),
         'blocks': doc.edited_blocks,
+        'elements': doc.added_elements,
         'image_width': image.width,
         'image_height': image.height,
         'font_path': django_settings.BASE_DIR / 'static' / 'fonts' / 'NotoSansBengali-Regular.ttf',

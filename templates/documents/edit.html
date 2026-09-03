@@ -11,76 +11,273 @@
         {% endfor %}
     {% endif %}
 
-    <div style="display:flex; gap:10px; margin-bottom:16px;">
-        <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+    <!-- Toolbar -->
+    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
+        <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
             💾 Save Changes
         </button>
-        <a href="{% url 'documents:document_export' doc.pk %}" style="background:#15803d; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-            ⬇ Export as PDF (New File)
+        <a href="{% url 'documents:document_export' doc.pk %}" style="background:#15803d; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            ⬇ Export as PDF
         </a>
         {% if doc.exported_file %}
-        <a href="{{ doc.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+        <a href="{{ doc.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
             📄 View Last Export
         </a>
         {% endif %}
+
+        <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
+
+        <button id="addImageBtn" style="background:#7c3aed; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            🖼 Add Image
+        </button>
+        <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
+
+        <button id="addCoverBtn" style="background:#334155; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            ⬜ Cover/Erase Box
+        </button>
+
+        <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
+
+        <button id="zoomOutBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">−</button>
+        <span id="zoomLabel" style="font-size:13px; color:#334155; font-weight:600; min-width:48px; text-align:center;">100%</span>
+        <button id="zoomInBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">+</button>
+        <button id="zoomResetBtn" style="background:#e2e8f0; color:#334155; padding:9px 16px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Reset</button>
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
-        ⚠️ Note: Exported text uses a clean Bangla/English font for correct rendering — it may look slightly different from the original scan's exact font style.
+        ⚠️ Tip: Use Zoom to work more precisely. Click a text box to edit it, click an added image/cover box to move, resize, or delete it (× button appears on the box).
     </div>
 
-    <div class="card" style="overflow:auto;">
-        <div id="editorContainer" style="position:relative; display:inline-block;">
-            <img src="{{ doc.original_image.url }}" style="display:block; max-width:100%; height:auto;" id="docImage">
-            <div id="overlayLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+    <!-- Scrollable editor area -->
+    <div class="card" style="overflow:auto; max-height:75vh; padding:20px;">
+        <div id="zoomWrapper" style="transform-origin: top left; display:inline-block;">
+            <div id="editorContainer" style="position:relative; display:inline-block;">
+                <img src="{{ doc.original_image.url }}" style="display:block;" id="docImage">
+                <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+                <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>
         </div>
     </div>
 
     <form id="hiddenForm" method="post" style="display:none;">
         {% csrf_token %}
         <input type="hidden" name="edited_blocks_json" id="editedBlocksJson">
+        <input type="hidden" name="added_elements_json" id="addedElementsJson">
     </form>
 
     <script>
         const blocks = {{ blocks_json|safe }};
+        let elements = {{ elements_json|safe }};
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
-        const overlayLayer = document.getElementById('overlayLayer');
-        const docImage = document.getElementById('docImage');
+        const uploadUrl = "{% url 'documents:element_image_upload' doc.pk %}";
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        function renderBoxes() {
-            overlayLayer.innerHTML = '';
-            const scaleX = docImage.clientWidth / originalWidth;
-            const scaleY = docImage.clientHeight / originalHeight;
+        const textLayer = document.getElementById('textLayer');
+        const elementLayer = document.getElementById('elementLayer');
+        const docImage = document.getElementById('docImage');
+        const zoomWrapper = document.getElementById('zoomWrapper');
+        const zoomLabel = document.getElementById('zoomLabel');
+
+        let zoomLevel = 1.0;
+
+        function applyZoom() {
+            zoomWrapper.style.transform = `scale(${zoomLevel})`;
+            zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
+        }
+
+        document.getElementById('zoomInBtn').addEventListener('click', () => {
+            zoomLevel = Math.min(zoomLevel + 0.1, 3.0);
+            applyZoom();
+        });
+        document.getElementById('zoomOutBtn').addEventListener('click', () => {
+            zoomLevel = Math.max(zoomLevel - 0.1, 0.3);
+            applyZoom();
+        });
+        document.getElementById('zoomResetBtn').addEventListener('click', () => {
+            zoomLevel = 1.0;
+            applyZoom();
+        });
+
+        function getScale() {
+            return {
+                x: docImage.clientWidth / originalWidth,
+                y: docImage.clientHeight / originalHeight,
+            };
+        }
+
+        function renderTextBoxes() {
+            textLayer.innerHTML = '';
+            const scale = getScale();
 
             blocks.forEach((block, index) => {
                 const input = document.createElement('textarea');
                 input.value = block.text;
-                input.dataset.index = index;
                 input.style.position = 'absolute';
-                input.style.left = (block.left * scaleX) + 'px';
-                input.style.top = (block.top * scaleY) + 'px';
-                input.style.width = Math.max(block.width * scaleX, 40) + 'px';
-                input.style.height = Math.max(block.height * scaleY, 18) + 'px';
-                input.style.fontSize = Math.max((block.height * scaleY) * 0.75, 10) + 'px';
+                input.style.left = (block.left * scale.x) + 'px';
+                input.style.top = (block.top * scale.y) + 'px';
+                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
+                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
+                input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
                 input.style.border = '1px dashed #3b82f6';
                 input.style.background = 'rgba(255,255,255,0.85)';
                 input.style.resize = 'none';
                 input.style.overflow = 'hidden';
                 input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
-                input.addEventListener('input', () => {
-                    blocks[index].text = input.value;
-                });
-                overlayLayer.appendChild(input);
+                input.addEventListener('input', () => { blocks[index].text = input.value; });
+                textLayer.appendChild(input);
             });
         }
 
-        docImage.onload = renderBoxes;
-        if (docImage.complete) renderBoxes();
-        window.addEventListener('resize', renderBoxes);
+        function makeDraggableResizable(el, elData) {
+            let isDragging = false, isResizing = false;
+            let startX, startY, startLeft, startTop, startWidth, startHeight;
 
+            el.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-handle')) return;
+                isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                startLeft = parseFloat(el.style.left);
+                startTop = parseFloat(el.style.top);
+                e.preventDefault();
+            });
+
+            const resizeHandle = el.querySelector('.resize-handle');
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX; startY = e.clientY;
+                startWidth = parseFloat(el.style.width);
+                startHeight = parseFloat(el.style.height);
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                const scale = getScale();
+                if (isDragging) {
+                    const dx = (e.clientX - startX) / zoomLevel;
+                    const dy = (e.clientY - startY) / zoomLevel;
+                    el.style.left = (startLeft + dx) + 'px';
+                    el.style.top = (startTop + dy) + 'px';
+                    elData.left = (startLeft + dx) / scale.x;
+                    elData.top = (startTop + dy) / scale.y;
+                }
+                if (isResizing) {
+                    const dx = (e.clientX - startX) / zoomLevel;
+                    const dy = (e.clientY - startY) / zoomLevel;
+                    const newWidth = Math.max(startWidth + dx, 20);
+                    const newHeight = Math.max(startHeight + dy, 20);
+                    el.style.width = newWidth + 'px';
+                    el.style.height = newHeight + 'px';
+                    elData.width = newWidth / scale.x;
+                    elData.height = newHeight / scale.y;
+                }
+            });
+
+            document.addEventListener('mouseup', () => { isDragging = false; isResizing = false; });
+        }
+
+        function renderElements() {
+            elementLayer.innerHTML = '';
+            const scale = getScale();
+
+            elements.forEach((elData, index) => {
+                const box = document.createElement('div');
+                box.style.position = 'absolute';
+                box.style.left = (elData.left * scale.x) + 'px';
+                box.style.top = (elData.top * scale.y) + 'px';
+                box.style.width = (elData.width * scale.x) + 'px';
+                box.style.height = (elData.height * scale.y) + 'px';
+                box.style.border = '2px solid #7c3aed';
+                box.style.cursor = 'move';
+
+                if (elData.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = elData.src;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    box.appendChild(img);
+                } else if (elData.type === 'cover') {
+                    box.style.background = '#ffffff';
+                    box.style.border = '2px dashed #94a3b8';
+                }
+
+                const deleteBtn = document.createElement('div');
+                deleteBtn.textContent = '×';
+                deleteBtn.className = 'delete-handle';
+                deleteBtn.style.cssText = 'position:absolute; top:-12px; right:-12px; width:24px; height:24px; background:#b91c1c; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-weight:700;';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    elements.splice(index, 1);
+                    renderElements();
+                });
+                box.appendChild(deleteBtn);
+
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                resizeHandle.style.cssText = 'position:absolute; bottom:-6px; right:-6px; width:14px; height:14px; background:#7c3aed; border-radius:3px; cursor:nwse-resize;';
+                box.appendChild(resizeHandle);
+
+                elementLayer.appendChild(box);
+                makeDraggableResizable(box, elData);
+            });
+        }
+
+        function renderAll() {
+            renderTextBoxes();
+            renderElements();
+        }
+
+        docImage.onload = renderAll;
+        if (docImage.complete) renderAll();
+        window.addEventListener('resize', renderAll);
+
+        // Add Image
+        document.getElementById('addImageBtn').addEventListener('click', () => {
+            document.getElementById('imageFileInput').click();
+        });
+
+        document.getElementById('imageFileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                body: formData,
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                elements.push({
+                    type: 'image',
+                    src: data.url,
+                    left: 50, top: 50, width: 150, height: 150,
+                });
+                renderElements();
+            } else {
+                alert('Image upload failed.');
+            }
+            e.target.value = '';
+        });
+
+        // Add Cover/Erase Box
+        document.getElementById('addCoverBtn').addEventListener('click', () => {
+            elements.push({
+                type: 'cover',
+                left: 50, top: 50, width: 150, height: 60,
+            });
+            renderElements();
+        });
+
+        // Save
         document.getElementById('saveBtn').addEventListener('click', () => {
             document.getElementById('editedBlocksJson').value = JSON.stringify(blocks);
+            document.getElementById('addedElementsJson').value = JSON.stringify(elements);
             document.getElementById('hiddenForm').submit();
         });
     </script>
