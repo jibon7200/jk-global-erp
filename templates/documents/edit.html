@@ -179,6 +179,7 @@
 
         function renderElements() {
             elementLayer.innerHTML = '';
+            elementLayer.style.pointerEvents = 'none';
             const scale = getScale();
 
             elements.forEach((elData, index) => {
@@ -190,6 +191,7 @@
                 box.style.height = (elData.height * scale.y) + 'px';
                 box.style.border = '2px solid #7c3aed';
                 box.style.cursor = 'move';
+                box.style.pointerEvents = 'auto';
 
                 if (elData.type === 'image') {
                     const img = document.createElement('img');
