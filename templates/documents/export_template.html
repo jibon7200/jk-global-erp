@@ -37,6 +37,8 @@
                 <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:white;"></div>
             {% elif element.type == 'image' %}
                 <img src="{{ element.src }}" style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; object-fit:contain;">
+            {% elif element.type == 'text' %}
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; font-size:{{ element.font_size }}px; color:{{ element.color }}; white-space:pre-wrap;">{{ element.text }}</div>
             {% endif %}
         {% endfor %}
 

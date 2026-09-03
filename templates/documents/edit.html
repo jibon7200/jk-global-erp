@@ -36,6 +36,14 @@
             ⬜ Cover/Erase Box
         </button>
 
+        <button id="addCoverBtn" style="background:#334155; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            ⬜ Cover/Erase Box
+        </button>
+
+        <button id="addTextBtn" style="background:#0891b2; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            🅰 Add Text
+        </button>       
+
         <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
 
         <button id="zoomOutBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">−</button>
@@ -203,6 +211,56 @@
                 } else if (elData.type === 'cover') {
                     box.style.background = '#ffffff';
                     box.style.border = '2px dashed #94a3b8';
+                } else if (elData.type === 'text') {
+                    box.style.border = '1px dashed #0891b2';
+                    box.style.background = 'rgba(255,255,255,0.6)';
+
+                    const textInput = document.createElement('textarea');
+                    textInput.value = elData.text || '';
+                    textInput.placeholder = 'Type here...';
+                    textInput.style.width = '100%';
+                    textInput.style.height = '100%';
+                    textInput.style.border = 'none';
+                    textInput.style.background = 'transparent';
+                    textInput.style.resize = 'none';
+                    textInput.style.overflow = 'hidden';
+                    textInput.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+                    textInput.style.fontSize = (elData.font_size || 16) + 'px';
+                    textInput.style.color = elData.color || '#000000';
+                    textInput.style.padding = '2px';
+                    textInput.addEventListener('mousedown', (e) => e.stopPropagation());
+                    textInput.addEventListener('input', () => { elData.text = textInput.value; });
+                    box.appendChild(textInput);
+
+                    // Small font-size controls for this text box
+                    const fontControls = document.createElement('div');
+                    fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:3px; background:#0891b2; border-radius:5px; padding:2px;';
+
+                    const decreaseBtn = document.createElement('button');
+                    decreaseBtn.textContent = 'A−';
+                    decreaseBtn.type = 'button';
+                    decreaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    decreaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    decreaseBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        elData.font_size = Math.max((elData.font_size || 16) - 2, 8);
+                        textInput.style.fontSize = elData.font_size + 'px';
+                    });
+
+                    const increaseBtn = document.createElement('button');
+                    increaseBtn.textContent = 'A+';
+                    increaseBtn.type = 'button';
+                    increaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    increaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    increaseBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        elData.font_size = Math.min((elData.font_size || 16) + 2, 100);
+                        textInput.style.fontSize = elData.font_size + 'px';
+                    });
+
+                    fontControls.appendChild(decreaseBtn);
+                    fontControls.appendChild(increaseBtn);
+                    box.appendChild(fontControls);
                 }
 
                 const deleteBtn = document.createElement('div');
@@ -272,6 +330,26 @@
             elements.push({
                 type: 'cover',
                 left: 50, top: 50, width: 150, height: 60,
+            });
+            renderElements();
+        });
+                // Add Cover/Erase Box
+        document.getElementById('addCoverBtn').addEventListener('click', () => {
+            elements.push({
+                type: 'cover',
+                left: 50, top: 50, width: 150, height: 60,
+            });
+            renderElements();
+        });
+
+        // Add Text Box
+        document.getElementById('addTextBtn').addEventListener('click', () => {
+            elements.push({
+                type: 'text',
+                text: '',
+                left: 50, top: 50, width: 180, height: 40,
+                font_size: 16,
+                color: '#000000',
             });
             renderElements();
         });
