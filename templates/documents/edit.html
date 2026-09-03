@@ -209,11 +209,21 @@
                     img.style.objectFit = 'contain';
                     box.appendChild(img);
                 } else if (elData.type === 'cover') {
-                    box.style.background = '#ffffff';
+                    if (!elData.color) elData.color = '#ffffff';
+                    box.style.background = elData.color;
                     box.style.border = '2px dashed #94a3b8';
+
+                    const colorPicker = document.createElement('input');
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:32px; height:22px; border:none; padding:0; cursor:pointer;';
+                    colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    colorPicker.addEventListener('input', (e) => {
+                        elData.color = e.target.value;
+                        box.style.background = elData.color;
+                    });
+                    box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
-                    box.style.border = '1px dashed #0891b2';
-                    box.style.background = 'rgba(255,255,255,0.6)';
 
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
@@ -258,8 +268,19 @@
                         textInput.style.fontSize = elData.font_size + 'px';
                     });
 
+                    const textColorPicker = document.createElement('input');
+                    textColorPicker.type = 'color';
+                    textColorPicker.value = elData.color || '#000000';
+                    textColorPicker.style.cssText = 'width:22px; height:22px; border:none; padding:0; cursor:pointer;';
+                    textColorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    textColorPicker.addEventListener('input', (e) => {
+                        elData.color = e.target.value;
+                        textInput.style.color = elData.color;
+                    });
+
                     fontControls.appendChild(decreaseBtn);
                     fontControls.appendChild(increaseBtn);
+                    fontControls.appendChild(textColorPicker);
                     box.appendChild(fontControls);
                 }
 
@@ -330,6 +351,7 @@
             elements.push({
                 type: 'cover',
                 left: 50, top: 50, width: 150, height: 60,
+                color: '#ffffff',
             });
             renderElements();
         });
