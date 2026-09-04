@@ -8,7 +8,9 @@ from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 from django.core.files.base import ContentFile
 from django.views.decorators.http import require_POST
-from core.ai_helper import ask_ai
+from core.ai_helper import ask_ai, generate_ai_image, check_and_increment_ai_image_quota
+from django.core.files.storage import default_storage
+import uuid
 from django.core.files.storage import default_storage
 
 import pytesseract
@@ -139,6 +141,7 @@ def document_edit_view(request, pk):
     context['image_height'] = image.height
     context['blocks_json'] = json.dumps(doc.edited_blocks)
     context['elements_json'] = json.dumps(doc.added_elements)
+    context['ai_image_daily_limit'] = django_settings.AI_IMAGE_DAILY_LIMIT
     return render(request, 'documents/edit.html', context)
 
 
@@ -221,3 +224,32 @@ def document_ai_assist_view(request, pk):
         return JsonResponse({'success': True, 'result': result_text})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+@require_POST
+def document_ai_image_view(request, pk):
+    """
+    Generates an AI image (Gemini "Nano Banana") from a text prompt
+    and saves it so it can be added as a new image element. Enforces
+    a small daily quota per user since this is not truly unlimited/free.
+    """
+    doc = get_object_or_404(DocumentEdit, pk=pk)
+    prompt = request.POST.get('prompt', '').strip()
+
+    if not prompt:
+        return JsonResponse({'success': False, 'error': 'Please describe the image you want.'}, status=400)
+
+    if not check_and_increment_ai_image_quota(request.user):
+        return JsonResponse({
+            'success': False,
+            'error': f'Daily AI image limit ({django_settings.AI_IMAGE_DAILY_LIMIT}) reached. Please try again tomorrow.'
+        }, status=429)
+
+    try:
+        image_bytes = generate_ai_image(prompt)
+        filename = f'documents/ai_images/{doc.pk}/{uuid.uuid4().hex}.png'
+        path = default_storage.save(filename, ContentFile(image_bytes))
+        url = default_storage.url(path)
+        return JsonResponse({'success': True, 'url': url})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)    

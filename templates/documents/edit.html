@@ -44,6 +44,10 @@
             ✨ Ask AI
         </button>
 
+        <button id="aiImageBtn" style="background:linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            🖼✨ AI Image
+        </button>
+
         <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
 
         <button id="zoomOutBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">−</button>
@@ -103,6 +107,30 @@
             </div>
         </div>
     </div>
+
+
+        <!-- AI Image Panel -->
+    <div id="aiImagePanel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:14px; padding:26px; width:90%; max-width:480px;">
+            <h3 style="font-size:16px; color:#0f172a; margin-bottom:6px;">🖼✨ AI Image Generator</h3>
+            <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Limited to {{ ai_image_daily_limit }} image(s) per day.</p>
+
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Describe the image you want</label>
+            <textarea id="aiImagePrompt" placeholder="e.g. A simple flat-style icon of a milk carton, white background" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+
+            <button id="aiImageGenerateBtn" type="button" style="background:#ef4444; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Generate Image</button>
+            <button id="aiImageCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; margin-left:8px;">Close</button>
+
+            <div id="aiImageLoading" style="display:none; font-size:12px; color:#64748b; margin-top:10px;">Generating... this may take a moment.</div>
+            <div id="aiImageError" style="display:none; background:#fef2f2; color:#b91c1c; padding:10px; border-radius:8px; font-size:12px; margin-top:10px;"></div>
+            <div id="aiImagePreviewBox" style="display:none; margin-top:14px; text-align:center;">
+                <img id="aiImagePreview" style="max-width:100%; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:10px;">
+                <br>
+                <button id="aiImageInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ Insert into Document</button>
+            </div>
+        </div>
+    </div>
+
 
     <form id="hiddenForm" method="post" style="display:none;">
         {% csrf_token %}
@@ -454,6 +482,71 @@
             renderElements();
             document.getElementById('aiPanel').style.display = 'none';
             document.getElementById('aiResultBox').style.display = 'none';
+        });
+
+        
+        // AI Image Panel
+        const aiImageUrl = "{% url 'documents:document_ai_image' doc.pk %}";
+        let lastGeneratedImageUrl = null;
+
+        document.getElementById('aiImageBtn').addEventListener('click', () => {
+            document.getElementById('aiImagePanel').style.display = 'flex';
+        });
+        document.getElementById('aiImageCloseBtn').addEventListener('click', () => {
+            document.getElementById('aiImagePanel').style.display = 'none';
+            document.getElementById('aiImagePreviewBox').style.display = 'none';
+            document.getElementById('aiImageError').style.display = 'none';
+        });
+
+        document.getElementById('aiImageGenerateBtn').addEventListener('click', async () => {
+            const prompt = document.getElementById('aiImagePrompt').value.trim();
+            const errorBox = document.getElementById('aiImageError');
+            const loadingBox = document.getElementById('aiImageLoading');
+            const previewBox = document.getElementById('aiImagePreviewBox');
+
+            errorBox.style.display = 'none';
+            previewBox.style.display = 'none';
+
+            if (!prompt) {
+                errorBox.textContent = 'Please describe the image you want.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            loadingBox.style.display = 'block';
+
+            const formData = new URLSearchParams();
+            formData.append('prompt', prompt);
+
+            try {
+                const response = await fetch(aiImageUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData,
+                });
+                const data = await response.json();
+                loadingBox.style.display = 'none';
+
+                if (data.success) {
+                    lastGeneratedImageUrl = data.url;
+                    document.getElementById('aiImagePreview').src = data.url;
+                    previewBox.style.display = 'block';
+                } else {
+                    errorBox.textContent = data.error || 'Something went wrong.';
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                loadingBox.style.display = 'none';
+                errorBox.textContent = 'Network error. Please try again.';
+                errorBox.style.display = 'block';
+            }
+        });
+
+        document.getElementById('aiImageInsertBtn').addEventListener('click', () => {
+            elements.push({ type: 'image', src: lastGeneratedImageUrl, left: 50, top: 50, width: 180, height: 180 });
+            renderElements();
+            document.getElementById('aiImagePanel').style.display = 'none';
+            document.getElementById('aiImagePreviewBox').style.display = 'none';
         });
 
         // Save

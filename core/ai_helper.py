@@ -1,5 +1,8 @@
 from google import genai
 from django.conf import settings
+from django.utils import timezone
+from PIL import Image
+from io import BytesIO
 
 
 def ask_ai(instruction, context_text=""):
@@ -45,3 +48,53 @@ def ask_ai(instruction, context_text=""):
         contents=prompt
     )
     return response.text.strip()
+
+
+def check_and_increment_ai_image_quota(user):
+    """
+    Checks if this user still has AI image generations left today.
+    If yes, increments their counter and returns True.
+    If the daily limit is reached, returns False WITHOUT incrementing.
+    """
+    from .models import AIImageUsage
+
+    today = timezone.localdate()
+    usage, _ = AIImageUsage.objects.get_or_create(user=user, date=today)
+
+    if usage.count >= settings.AI_IMAGE_DAILY_LIMIT:
+        return False
+
+    usage.count += 1
+    usage.save()
+    return True
+
+
+def generate_ai_image(prompt, reference_image_bytes=None):
+    """
+    Generates (or edits, if a reference image is given) an image
+    using Google's free-tier "Nano Banana" model. Returns raw PNG
+    bytes. This is NOT unlimited — callers MUST check the daily
+    quota via check_and_increment_ai_image_quota() before calling
+    this, to avoid unexpectedly hitting Google's usage limits.
+    """
+    if not settings.GEMINI_API_KEY:
+        raise Exception(
+            "Gemini API key is not configured. Please add GEMINI_API_KEY to your .env file."
+        )
+
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+    contents = [prompt]
+    if reference_image_bytes:
+        contents.append(Image.open(BytesIO(reference_image_bytes)))
+
+    response = client.models.generate_content(
+        model='gemini-2.5-flash-image',
+        contents=contents
+    )
+
+    for part in response.parts:
+        if part.inline_data is not None:
+            return part.inline_data.data
+
+    raise Exception("AI did not return an image. Try rephrasing your request.")

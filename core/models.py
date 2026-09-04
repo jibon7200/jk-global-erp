@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class SiteSettings(models.Model):
@@ -62,3 +63,29 @@ class SiteSettings(models.Model):
     class Meta:
         verbose_name = "Site Settings"
         verbose_name_plural = "Site Settings"
+
+
+class AIImageUsage(models.Model):
+    """
+    Tracks how many AI image generations each user has made TODAY,
+    so we can enforce a small daily limit — AI image generation is
+    NOT truly unlimited/free even on Google's free tier, so this
+    protects against accidentally exceeding it.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='ai_image_usage'
+    )
+
+    date = models.DateField()
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'date')
+        verbose_name = "AI Image Usage"
+        verbose_name_plural = "AI Image Usage Records"
+
+    def __str__(self):
+        return f"{self.user.username} — {self.date} — {self.count} image(s)"       

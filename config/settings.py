@@ -173,4 +173,5 @@ LIBREOFFICE_PATH = config(
     default=r'C:\Program Files\LibreOffice\program\soffice.exe'
 )
 
+AI_IMAGE_DAILY_LIMIT = config('AI_IMAGE_DAILY_LIMIT', default=20, cast=int)
 
