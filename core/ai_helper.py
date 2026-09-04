@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 from django.conf import settings
 
 
@@ -24,8 +24,7 @@ def ask_ai(instruction, context_text=""):
             "Gemini API key is not configured. Please add GEMINI_API_KEY to your .env file."
         )
 
-    genai.configure(api_key=settings.GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     if context_text:
         prompt = (
@@ -41,5 +40,8 @@ def ask_ai(instruction, context_text=""):
             f"Reply with ONLY the generated text — no explanation, no quotes, no extra commentary."
         )
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-3.6-flash',
+        contents=prompt
+    )
     return response.text.strip()
