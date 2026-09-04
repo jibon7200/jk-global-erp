@@ -165,3 +165,12 @@ TESSERACT_CMD_PATH = config(
 # AI Configuration (Free — Google Gemini)
 # ============================================
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+
+
+
+LIBREOFFICE_PATH = config(
+    'LIBREOFFICE_PATH',
+    default=r'C:\Program Files\LibreOffice\program\soffice.exe'
+)
+
+

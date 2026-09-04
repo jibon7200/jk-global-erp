@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Document{% endblock %}
-{% block page_title %}Document Editor — Edit{% endblock %}
+{% block title %}Edit Page{% endblock %}
+{% block page_title %}PDF Editor — Edit Page{% endblock %}
 
 {% block content %}
 
@@ -11,19 +11,15 @@
         {% endfor %}
     {% endif %}
 
+    <div style="margin-bottom:14px;">
+        <a href="{% url 'pdf_editor:project_edit' project.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">← Back to Page List</a>
+    </div>
+
     <!-- Toolbar -->
     <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
         <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            💾 Save Changes
+            💾 Save Page
         </button>
-        <a href="{% url 'documents:document_export' doc.pk %}" style="background:#15803d; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-            ⬇ Export as PDF
-        </a>
-        {% if doc.exported_file %}
-        <a href="{{ doc.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-            📄 View Last Export
-        </a>
-        {% endif %}
 
         <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
 
@@ -53,15 +49,13 @@
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
-        ⚠️ Tip: Use Zoom to work more precisely. Click a text box to edit it, click an added image/cover/text box to move, resize, or delete it. Use "Cover" to hide original text before editing.
+        ⚠️ Note: To hide the original PDF text/content here, use "Cover/Erase Box" first, then "Add Text" on top of it.
     </div>
 
-    <!-- Scrollable editor area -->
     <div class="card" style="overflow:auto; max-height:75vh; padding:20px;">
         <div id="zoomWrapper" style="transform-origin: top left; display:inline-block;">
             <div id="editorContainer" style="position:relative; display:inline-block;">
-                <img src="{{ doc.original_image.url }}" style="display:block;" id="docImage">
-                <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+                <img src="{% url 'pdf_editor:page_thumbnail' page_entry.source_file_id page_entry.page_number %}?rotation={{ page_entry.rotation }}&scale=2.0" style="display:block;" id="pageImage">
                 <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>
         </div>
@@ -72,19 +66,13 @@
         <div style="background:#fff; border-radius:14px; padding:26px; width:90%; max-width:520px; max-height:85vh; overflow-y:auto;">
             <h3 style="font-size:16px; color:#0f172a; margin-bottom:14px;">✨ Ask AI (Google Gemini)</h3>
 
-            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
-                What do you want AI to do?
-            </label>
-            <textarea id="aiInstruction" placeholder="e.g. Write a formal paragraph about our milk business growth in Bangla" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">What do you want AI to do?</label>
+            <textarea id="aiInstruction" placeholder="e.g. Write a formal note in Bangla about visa requirements" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
 
-            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
-                Existing text to work with (optional)
-            </label>
-            <textarea id="aiContextText" placeholder="Paste or type existing text here if you want AI to rewrite/improve it" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Existing text to work with (optional)</label>
+            <textarea id="aiContextText" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
 
-            <button id="aiGenerateBtn" type="button" style="background:#7c3aed; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-                Generate
-            </button>
+            <button id="aiGenerateBtn" type="button" style="background:#7c3aed; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Generate</button>
 
             <div id="aiLoading" style="display:none; font-size:12px; color:#64748b; margin-top:10px;">Thinking...</div>
             <div id="aiError" style="display:none; background:#fef2f2; color:#b91c1c; padding:10px; border-radius:8px; font-size:12px; margin-top:10px;"></div>
@@ -93,12 +81,8 @@
                 <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Result:</label>
                 <textarea id="aiResultText" style="width:100%; height:100px; padding:10px; border:1.5px solid #7c3aed; border-radius:8px; font-size:13px; font-family:'Noto Sans Bengali', Arial, sans-serif;"></textarea>
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button id="aiInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-                        + Insert as New Text Box
-                    </button>
-                    <button id="aiCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-                        Close
-                    </button>
+                    <button id="aiInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ Insert as New Text Box</button>
+                    <button id="aiCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Close</button>
                 </div>
             </div>
         </div>
@@ -106,22 +90,19 @@
 
     <form id="hiddenForm" method="post" style="display:none;">
         {% csrf_token %}
-        <input type="hidden" name="edited_blocks_json" id="editedBlocksJson">
-        <input type="hidden" name="added_elements_json" id="addedElementsJson">
+        <input type="hidden" name="elements_json" id="elementsJson">
     </form>
 
     <script>
-        const blocks = {{ blocks_json|safe }};
         let elements = {{ elements_json|safe }};
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
-        const uploadUrl = "{% url 'documents:element_image_upload' doc.pk %}";
-        const aiAssistUrl = "{% url 'documents:document_ai_assist' doc.pk %}";
+        const uploadUrl = "{% url 'pdf_editor:page_element_image_upload' project.pk %}";
+        const aiAssistUrl = "{% url 'pdf_editor:pdf_ai_assist' project.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        const textLayer = document.getElementById('textLayer');
         const elementLayer = document.getElementById('elementLayer');
-        const docImage = document.getElementById('docImage');
+        const pageImage = document.getElementById('pageImage');
         const zoomWrapper = document.getElementById('zoomWrapper');
         const zoomLabel = document.getElementById('zoomLabel');
 
@@ -132,48 +113,12 @@
             zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
         }
 
-        document.getElementById('zoomInBtn').addEventListener('click', () => {
-            zoomLevel = Math.min(zoomLevel + 0.1, 3.0);
-            applyZoom();
-        });
-        document.getElementById('zoomOutBtn').addEventListener('click', () => {
-            zoomLevel = Math.max(zoomLevel - 0.1, 0.3);
-            applyZoom();
-        });
-        document.getElementById('zoomResetBtn').addEventListener('click', () => {
-            zoomLevel = 1.0;
-            applyZoom();
-        });
+        document.getElementById('zoomInBtn').addEventListener('click', () => { zoomLevel = Math.min(zoomLevel + 0.1, 3.0); applyZoom(); });
+        document.getElementById('zoomOutBtn').addEventListener('click', () => { zoomLevel = Math.max(zoomLevel - 0.1, 0.3); applyZoom(); });
+        document.getElementById('zoomResetBtn').addEventListener('click', () => { zoomLevel = 1.0; applyZoom(); });
 
         function getScale() {
-            return {
-                x: docImage.clientWidth / originalWidth,
-                y: docImage.clientHeight / originalHeight,
-            };
-        }
-
-        function renderTextBoxes() {
-            textLayer.innerHTML = '';
-            const scale = getScale();
-
-            blocks.forEach((block, index) => {
-                const input = document.createElement('textarea');
-                input.value = block.text;
-                input.style.position = 'absolute';
-                input.style.left = (block.left * scale.x) + 'px';
-                input.style.top = (block.top * scale.y) + 'px';
-                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
-                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
-                input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
-                input.style.border = '1px dashed #3b82f6';
-                input.style.background = 'transparent';
-                input.style.resize = 'none';
-                input.style.overflow = 'hidden';
-                input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
-                input.style.padding = '1px';
-                input.addEventListener('input', () => { blocks[index].text = input.value; });
-                textLayer.appendChild(input);
-            });
+            return { x: pageImage.clientWidth / originalWidth, y: pageImage.clientHeight / originalHeight };
         }
 
         function makeDraggableResizable(el, elData) {
@@ -244,9 +189,7 @@
                 if (elData.type === 'image') {
                     const img = document.createElement('img');
                     img.src = elData.src;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'contain';
+                    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain';
                     box.appendChild(img);
                 } else if (elData.type === 'cover') {
                     if (!elData.color) elData.color = '#ffffff';
@@ -258,10 +201,7 @@
                     colorPicker.value = elData.color;
                     colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:32px; height:22px; border:none; padding:0; cursor:pointer;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
-                    colorPicker.addEventListener('input', (e) => {
-                        elData.color = e.target.value;
-                        box.style.background = elData.color;
-                    });
+                    colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
                     box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
                     box.style.border = '1px dashed #0891b2';
@@ -270,12 +210,9 @@
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
                     textInput.placeholder = 'Type here...';
-                    textInput.style.width = '100%';
-                    textInput.style.height = '100%';
-                    textInput.style.border = 'none';
-                    textInput.style.background = 'transparent';
-                    textInput.style.resize = 'none';
-                    textInput.style.overflow = 'hidden';
+                    textInput.style.width = '100%'; textInput.style.height = '100%';
+                    textInput.style.border = 'none'; textInput.style.background = 'transparent';
+                    textInput.style.resize = 'none'; textInput.style.overflow = 'hidden';
                     textInput.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
                     textInput.style.fontSize = (elData.font_size || 16) + 'px';
                     textInput.style.color = elData.color || '#000000';
@@ -288,52 +225,32 @@
                     fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:3px; background:#0891b2; border-radius:5px; padding:2px;';
 
                     const decreaseBtn = document.createElement('button');
-                    decreaseBtn.textContent = 'A−';
-                    decreaseBtn.type = 'button';
+                    decreaseBtn.textContent = 'A−'; decreaseBtn.type = 'button';
                     decreaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
                     decreaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-                    decreaseBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        elData.font_size = Math.max((elData.font_size || 16) - 2, 8);
-                        textInput.style.fontSize = elData.font_size + 'px';
-                    });
+                    decreaseBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.max((elData.font_size || 16) - 2, 8); textInput.style.fontSize = elData.font_size + 'px'; });
 
                     const increaseBtn = document.createElement('button');
-                    increaseBtn.textContent = 'A+';
-                    increaseBtn.type = 'button';
+                    increaseBtn.textContent = 'A+'; increaseBtn.type = 'button';
                     increaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
                     increaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-                    increaseBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        elData.font_size = Math.min((elData.font_size || 16) + 2, 100);
-                        textInput.style.fontSize = elData.font_size + 'px';
-                    });
+                    increaseBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.min((elData.font_size || 16) + 2, 100); textInput.style.fontSize = elData.font_size + 'px'; });
 
                     const textColorPicker = document.createElement('input');
                     textColorPicker.type = 'color';
                     textColorPicker.value = elData.color || '#000000';
                     textColorPicker.style.cssText = 'width:22px; height:22px; border:none; padding:0; cursor:pointer;';
                     textColorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
-                    textColorPicker.addEventListener('input', (e) => {
-                        elData.color = e.target.value;
-                        textInput.style.color = elData.color;
-                    });
+                    textColorPicker.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
 
-                    fontControls.appendChild(decreaseBtn);
-                    fontControls.appendChild(increaseBtn);
-                    fontControls.appendChild(textColorPicker);
+                    fontControls.appendChild(decreaseBtn); fontControls.appendChild(increaseBtn); fontControls.appendChild(textColorPicker);
                     box.appendChild(fontControls);
                 }
 
                 const deleteBtn = document.createElement('div');
-                deleteBtn.textContent = '×';
-                deleteBtn.className = 'delete-handle';
+                deleteBtn.textContent = '×'; deleteBtn.className = 'delete-handle';
                 deleteBtn.style.cssText = 'position:absolute; top:-12px; right:-12px; width:24px; height:24px; background:#b91c1c; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-weight:700;';
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    elements.splice(index, 1);
-                    renderElements();
-                });
+                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); elements.splice(index, 1); renderElements(); });
                 box.appendChild(deleteBtn);
 
                 const resizeHandle = document.createElement('div');
@@ -346,57 +263,36 @@
             });
         }
 
-        function renderAll() {
-            renderTextBoxes();
-            renderElements();
-        }
+        pageImage.onload = renderElements;
+        if (pageImage.complete) renderElements();
+        window.addEventListener('resize', renderElements);
 
-        docImage.onload = renderAll;
-        if (docImage.complete) renderAll();
-        window.addEventListener('resize', renderAll);
-
-        document.getElementById('addImageBtn').addEventListener('click', () => {
-            document.getElementById('imageFileInput').click();
-        });
-
+        document.getElementById('addImageBtn').addEventListener('click', () => document.getElementById('imageFileInput').click());
         document.getElementById('imageFileInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const formData = new FormData();
             formData.append('image', file);
-
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken },
-                body: formData,
-            });
+            const response = await fetch(uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: formData });
             const data = await response.json();
-
             if (data.success) {
-                elements.push({ type: 'image', src: data.url, left: 50, top: 50, width: 150, height: 150 });
+                elements.push({ type: 'image', src: data.url, left: 50, top: 50, width: 200, height: 200 });
                 renderElements();
-            } else {
-                alert('Image upload failed.');
-            }
+            } else { alert('Image upload failed.'); }
             e.target.value = '';
         });
 
         document.getElementById('addCoverBtn').addEventListener('click', () => {
-            elements.push({ type: 'cover', left: 50, top: 50, width: 150, height: 60, color: '#ffffff' });
+            elements.push({ type: 'cover', left: 50, top: 50, width: 200, height: 80, color: '#ffffff' });
             renderElements();
         });
 
         document.getElementById('addTextBtn').addEventListener('click', () => {
-            elements.push({ type: 'text', text: '', left: 50, top: 50, width: 180, height: 40, font_size: 16, color: '#000000' });
+            elements.push({ type: 'text', text: '', left: 50, top: 50, width: 240, height: 50, font_size: 20, color: '#000000' });
             renderElements();
         });
 
-        // AI Assist Panel
-        document.getElementById('aiAssistBtn').addEventListener('click', () => {
-            document.getElementById('aiPanel').style.display = 'flex';
-        });
-
+        document.getElementById('aiAssistBtn').addEventListener('click', () => { document.getElementById('aiPanel').style.display = 'flex'; });
         document.getElementById('aiCloseBtn').addEventListener('click', () => {
             document.getElementById('aiPanel').style.display = 'none';
             document.getElementById('aiResultBox').style.display = 'none';
@@ -409,16 +305,9 @@
             const errorBox = document.getElementById('aiError');
             const loadingBox = document.getElementById('aiLoading');
             const resultBox = document.getElementById('aiResultBox');
+            errorBox.style.display = 'none'; resultBox.style.display = 'none';
 
-            errorBox.style.display = 'none';
-            resultBox.style.display = 'none';
-
-            if (!instruction) {
-                errorBox.textContent = 'Please enter an instruction.';
-                errorBox.style.display = 'block';
-                return;
-            }
-
+            if (!instruction) { errorBox.textContent = 'Please enter an instruction.'; errorBox.style.display = 'block'; return; }
             loadingBox.style.display = 'block';
 
             const formData = new URLSearchParams();
@@ -426,21 +315,11 @@
             formData.append('context_text', contextText);
 
             try {
-                const response = await fetch(aiAssistUrl, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData,
-                });
+                const response = await fetch(aiAssistUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
                 const data = await response.json();
                 loadingBox.style.display = 'none';
-
-                if (data.success) {
-                    document.getElementById('aiResultText').value = data.result;
-                    resultBox.style.display = 'block';
-                } else {
-                    errorBox.textContent = data.error || 'Something went wrong.';
-                    errorBox.style.display = 'block';
-                }
+                if (data.success) { document.getElementById('aiResultText').value = data.result; resultBox.style.display = 'block'; }
+                else { errorBox.textContent = data.error || 'Something went wrong.'; errorBox.style.display = 'block'; }
             } catch (err) {
                 loadingBox.style.display = 'none';
                 errorBox.textContent = 'Network error. Please try again.';
@@ -450,26 +329,16 @@
 
         document.getElementById('aiInsertBtn').addEventListener('click', () => {
             const resultText = document.getElementById('aiResultText').value;
-            elements.push({ type: 'text', text: resultText, left: 50, top: 50, width: 220, height: 60, font_size: 16, color: '#000000' });
+            elements.push({ type: 'text', text: resultText, left: 50, top: 50, width: 260, height: 70, font_size: 20, color: '#000000' });
             renderElements();
             document.getElementById('aiPanel').style.display = 'none';
             document.getElementById('aiResultBox').style.display = 'none';
         });
 
-        // Save
         document.getElementById('saveBtn').addEventListener('click', () => {
-            document.getElementById('editedBlocksJson').value = JSON.stringify(blocks);
-            document.getElementById('addedElementsJson').value = JSON.stringify(elements);
+            document.getElementById('elementsJson').value = JSON.stringify(elements);
             document.getElementById('hiddenForm').submit();
         });
     </script>
 
 {% endblock %}
-
-
-
-
-
-
-
-

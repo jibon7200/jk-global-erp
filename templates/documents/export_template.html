@@ -42,7 +42,7 @@
         {% endfor %}
 
         {% for block in blocks %}
-        <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px; {% if block.covered %}background:{{ block.color|default:"white" }};{% endif %}">
+        <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
             {{ block.text }}
         </div>
         {% endfor %}
