@@ -31,6 +31,7 @@ urlpatterns = [
     path('ocr/', include('ocr.urls')),
     path('documents/', include('documents.urls')),
     path('pdf/', include('pdf_editor.urls')),
+    path('status/', include('verification.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
 ]
 

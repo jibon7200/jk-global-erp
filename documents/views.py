@@ -73,12 +73,11 @@ def _extract_text_blocks(image_path):
     for line in lines.values():
         blocks.append({
             'text': line['text'],
+            'new_text': '',
             'left': line['left'],
             'top': line['top'],
             'width': line['right'] - line['left'],
             'height': line['bottom'] - line['top'],
-            'color': '#ffffff',
-            'covered': False,
         })
 
     return blocks, image.width, image.height
@@ -259,3 +258,17 @@ def document_ai_image_view(request, pk):
         return JsonResponse({'success': True, 'url': url})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)   
+
+
+@login_required
+@require_POST
+def document_delete_view(request, pk):
+    """
+    Permanently deletes a document edit session, including its
+    uploaded image and any exported file. Confirmed via a POST-only
+    endpoint (no accidental deletion via a simple link click/GET).
+    """
+    doc = get_object_or_404(DocumentEdit, pk=pk)
+    doc.delete()
+    messages.success(request, 'Document deleted.')
+    return redirect('documents:document_list')    

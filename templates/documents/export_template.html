@@ -33,18 +33,26 @@
 
         {% for element in elements %}
             {% if element.type == 'cover' %}
-                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:{{ element.color|default:"white" }};"></div>
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:{{ element.color|default:"white" }}; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);"></div>
             {% elif element.type == 'image' %}
-                <img src="{{ element.src }}" style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; object-fit:contain;">
+                <img src="{{ element.src }}" style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; object-fit:contain; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);">
+            {% elif element.type == 'rect' %}
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:{{ element.color|default:"#3b82f6" }}; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);"></div>
+            {% elif element.type == 'circle' %}
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; background:{{ element.color|default:"#3b82f6" }}; border-radius:50%; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);"></div>
+            {% elif element.type == 'line' %}
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:4px; background:{{ element.color|default:"#000000" }}; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);"></div>
             {% elif element.type == 'text' %}
-                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; font-size:{{ element.font_size }}px; color:{{ element.color }}; white-space:pre-wrap;">{{ element.text }}</div>
+                <div style="position:absolute; left:{{ element.left }}px; top:{{ element.top }}px; width:{{ element.width }}px; height:{{ element.height }}px; font-size:{{ element.font_size }}px; color:{{ element.color }}; white-space:pre-wrap; opacity:{{ element.opacity|default:"1" }}; transform:rotate({{ element.rotation|default:"0" }}deg);">{{ element.text }}</div>
             {% endif %}
         {% endfor %}
 
         {% for block in blocks %}
-        <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
-            {{ block.text }}
-        </div>
+            {% if block.new_text %}
+            <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
+                {{ block.new_text }}
+            </div>
+            {% endif %}
         {% endfor %}
     </div>
 </body>

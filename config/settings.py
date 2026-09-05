@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'ocr',
     'documents',
     'pdf_editor',
+    'verification',
 ]
 
 MIDDLEWARE = [

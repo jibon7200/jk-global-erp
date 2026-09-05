@@ -11,51 +11,38 @@
         {% endfor %}
     {% endif %}
 
-    <div style="margin-bottom:14px;">
-        <a href="{% url 'pdf_editor:project_edit' project.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">← Back to Page List</a>
-    </div>
-
     <!-- Toolbar -->
-    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
-        <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            💾 Save Page
-        </button>
-
-        <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
-
-        <button id="addImageBtn" style="background:#7c3aed; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            🖼 Add Image
-        </button>
+    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
+        <a href="{% url 'pdf_editor:project_edit' project.pk %}" style="background:#e2e8f0; color:#334155; padding:9px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:600;">← Back to Pages</a>
+        <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:9px 16px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 Save Page</button>
+        <span style="width:1px; height:22px; background:#e2e8f0;"></span>
+        <button id="undoBtn" style="background:#64748b; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">↶ Undo</button>
+        <span style="width:1px; height:22px; background:#e2e8f0;"></span>
+        <button id="addImageBtn" style="background:#7c3aed; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">🖼 Image</button>
         <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
-
-        <button id="addCoverBtn" style="background:#334155; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            ⬜ Cover/Erase Box
-        </button>
-
-        <button id="addTextBtn" style="background:#0891b2; color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            🅰 Add Text
-        </button>
-
-        <button id="aiAssistBtn" style="background:linear-gradient(135deg, #7c3aed, #2563eb); color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            ✨ Ask AI
-        </button>
-
-        <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
-
-        <button id="zoomOutBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">−</button>
-        <span id="zoomLabel" style="font-size:13px; color:#334155; font-weight:600; min-width:48px; text-align:center;">100%</span>
-        <button id="zoomInBtn" style="background:#e2e8f0; color:#334155; width:38px; height:38px; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer;">+</button>
-        <button id="zoomResetBtn" style="background:#e2e8f0; color:#334155; padding:9px 16px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Reset</button>
+        <button id="addCoverBtn" style="background:#334155; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">⬜ Cover</button>
+        <button id="addTextBtn" style="background:#0891b2; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">🅰 Text</button>
+        <button id="addRectBtn" style="background:#059669; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">▭ Rectangle</button>
+        <button id="addCircleBtn" style="background:#059669; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">◯ Circle</button>
+        <button id="addLineBtn" style="background:#059669; color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">／ Line</button>
+        <span style="width:1px; height:22px; background:#e2e8f0;"></span>
+        <button id="aiAssistBtn" style="background:linear-gradient(135deg, #7c3aed, #2563eb); color:#fff; padding:9px 14px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">✨ Ask AI</button>
+        <span style="width:1px; height:22px; background:#e2e8f0;"></span>
+        <button id="zoomOutBtn" style="background:#e2e8f0; color:#334155; width:32px; height:32px; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">−</button>
+        <span id="zoomLabel" style="font-size:12px; color:#334155; font-weight:600; min-width:42px; text-align:center;">100%</span>
+        <button id="zoomInBtn" style="background:#e2e8f0; color:#334155; width:32px; height:32px; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">+</button>
+        <button id="zoomResetBtn" style="background:#e2e8f0; color:#334155; padding:8px 12px; border:none; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer;">Reset</button>
     </div>
 
-    <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
-        ⚠️ Note: To hide the original PDF text/content here, use "Cover/Erase Box" first, then "Add Text" on top of it.
+    <div style="background:#fef3c7; color:#92400e; padding:9px 14px; border-radius:8px; margin-bottom:14px; font-size:11px;">
+        ⚠️ Each box has its own mini toolbar (rotate, opacity, duplicate, layer order) shown above it. Use "Cover" first to hide original content, then add text/shapes on top. Ctrl+Z also undoes.
     </div>
 
     <div class="card" style="overflow:auto; max-height:75vh; padding:20px;">
         <div id="zoomWrapper" style="transform-origin: top left; display:inline-block;">
             <div id="editorContainer" style="position:relative; display:inline-block;">
-                <img src="{% url 'pdf_editor:page_thumbnail' page_entry.source_file_id page_entry.page_number %}?rotation={{ page_entry.rotation }}&scale=2.0" style="display:block;" id="pageImage">
+                <img src="{% url 'pdf_editor:page_thumbnail' page_entry.source_file_id page_entry.page_number %}?rotation={{ page_entry.rotation }}&scale=2.0" style="display:block;" id="docImage">
+                <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                 <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>
         </div>
@@ -65,23 +52,18 @@
     <div id="aiPanel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center;">
         <div style="background:#fff; border-radius:14px; padding:26px; width:90%; max-width:520px; max-height:85vh; overflow-y:auto;">
             <h3 style="font-size:16px; color:#0f172a; margin-bottom:14px;">✨ Ask AI (Google Gemini)</h3>
-
             <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">What do you want AI to do?</label>
             <textarea id="aiInstruction" placeholder="e.g. Write a formal note in Bangla about visa requirements" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
-
-            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Existing text to work with (optional)</label>
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Existing text (optional)</label>
             <textarea id="aiContextText" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
-
             <button id="aiGenerateBtn" type="button" style="background:#7c3aed; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Generate</button>
-
             <div id="aiLoading" style="display:none; font-size:12px; color:#64748b; margin-top:10px;">Thinking...</div>
             <div id="aiError" style="display:none; background:#fef2f2; color:#b91c1c; padding:10px; border-radius:8px; font-size:12px; margin-top:10px;"></div>
-
             <div id="aiResultBox" style="display:none; margin-top:14px;">
                 <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Result:</label>
                 <textarea id="aiResultText" style="width:100%; height:100px; padding:10px; border:1.5px solid #7c3aed; border-radius:8px; font-size:13px; font-family:'Noto Sans Bengali', Arial, sans-serif;"></textarea>
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button id="aiInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ Insert as New Text Box</button>
+                    <button id="aiInsertBtn" type="button" style="background:#15803d; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ Insert as Text Box</button>
                     <button id="aiCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Close</button>
                 </div>
             </div>
@@ -91,44 +73,90 @@
     <form id="hiddenForm" method="post" style="display:none;">
         {% csrf_token %}
         <input type="hidden" name="elements_json" id="elementsJson">
+        <input type="hidden" name="text_blocks_json" id="textBlocksJson">
     </form>
 
     <script>
         let elements = {{ elements_json|safe }};
+        let textBlocks = {{ text_blocks_json|safe }};
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
         const uploadUrl = "{% url 'pdf_editor:page_element_image_upload' project.pk %}";
         const aiAssistUrl = "{% url 'pdf_editor:pdf_ai_assist' project.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+        const textLayer = document.getElementById('textLayer');
         const elementLayer = document.getElementById('elementLayer');
-        const pageImage = document.getElementById('pageImage');
+        const docImage = document.getElementById('docImage');
         const zoomWrapper = document.getElementById('zoomWrapper');
         const zoomLabel = document.getElementById('zoomLabel');
 
         let zoomLevel = 1.0;
+        let undoStack = [];
+
+        function pushUndo() {
+            undoStack.push(JSON.stringify(elements));
+            if (undoStack.length > 30) undoStack.shift();
+        }
+        function undo() {
+            if (undoStack.length === 0) return;
+            elements = JSON.parse(undoStack.pop());
+            renderElements();
+        }
+        document.getElementById('undoBtn').addEventListener('click', undo);
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+        });
 
         function applyZoom() {
             zoomWrapper.style.transform = `scale(${zoomLevel})`;
             zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
         }
-
         document.getElementById('zoomInBtn').addEventListener('click', () => { zoomLevel = Math.min(zoomLevel + 0.1, 3.0); applyZoom(); });
         document.getElementById('zoomOutBtn').addEventListener('click', () => { zoomLevel = Math.max(zoomLevel - 0.1, 0.3); applyZoom(); });
         document.getElementById('zoomResetBtn').addEventListener('click', () => { zoomLevel = 1.0; applyZoom(); });
 
         function getScale() {
-            return { x: pageImage.clientWidth / originalWidth, y: pageImage.clientHeight / originalHeight };
+            return { x: docImage.clientWidth / originalWidth, y: docImage.clientHeight / originalHeight };
+        }
+
+        function renderTextBlocks() {
+            textLayer.innerHTML = '';
+            const scale = getScale();
+
+            textBlocks.forEach((block, index) => {
+                if (block.new_text === undefined) block.new_text = '';
+
+                const input = document.createElement('textarea');
+                input.value = block.new_text;
+                input.placeholder = block.text;
+                input.style.position = 'absolute';
+                input.style.left = (block.left * scale.x) + 'px';
+                input.style.top = (block.top * scale.y) + 'px';
+                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
+                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
+                input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
+                input.style.border = '1px dashed #3b82f6';
+                input.style.background = 'transparent';
+                input.style.resize = 'none';
+                input.style.overflow = 'hidden';
+                input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+                input.style.color = '#dc2626';
+                input.style.padding = '1px';
+                input.addEventListener('input', () => { textBlocks[index].new_text = input.value; });
+                textLayer.appendChild(input);
+            });
         }
 
         function makeDraggableResizable(el, elData) {
             let isDragging = false, isResizing = false;
             let startX, startY, startLeft, startTop, startWidth, startHeight;
+            let movedSnapshot = false;
 
             el.addEventListener('mousedown', (e) => {
                 if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-handle')) return;
-                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                isDragging = true;
+                if (['TEXTAREA', 'INPUT', 'BUTTON', 'SELECT'].includes(e.target.tagName)) return;
+                isDragging = true; movedSnapshot = false;
                 startX = e.clientX; startY = e.clientY;
                 startLeft = parseFloat(el.style.left);
                 startTop = parseFloat(el.style.top);
@@ -137,16 +165,16 @@
 
             const resizeHandle = el.querySelector('.resize-handle');
             resizeHandle.addEventListener('mousedown', (e) => {
-                isResizing = true;
+                isResizing = true; movedSnapshot = false;
                 startX = e.clientX; startY = e.clientY;
                 startWidth = parseFloat(el.style.width);
                 startHeight = parseFloat(el.style.height);
-                e.stopPropagation();
-                e.preventDefault();
+                e.stopPropagation(); e.preventDefault();
             });
 
             document.addEventListener('mousemove', (e) => {
                 const scale = getScale();
+                if ((isDragging || isResizing) && !movedSnapshot) { pushUndo(); movedSnapshot = true; }
                 if (isDragging) {
                     const dx = (e.clientX - startX) / zoomLevel;
                     const dy = (e.clientY - startY) / zoomLevel;
@@ -159,15 +187,60 @@
                     const dx = (e.clientX - startX) / zoomLevel;
                     const dy = (e.clientY - startY) / zoomLevel;
                     const newWidth = Math.max(startWidth + dx, 20);
-                    const newHeight = Math.max(startHeight + dy, 20);
+                    const newHeight = Math.max(startHeight + dy, 10);
                     el.style.width = newWidth + 'px';
                     el.style.height = newHeight + 'px';
                     elData.width = newWidth / scale.x;
                     elData.height = newHeight / scale.y;
                 }
             });
-
             document.addEventListener('mouseup', () => { isDragging = false; isResizing = false; });
+        }
+
+        function addUniversalControls(box, elData, index) {
+            const bar = document.createElement('div');
+            bar.style.cssText = 'position:absolute; top:-26px; right:0; display:flex; gap:2px; z-index:6;';
+
+            const rotateBtn = document.createElement('button');
+            rotateBtn.type = 'button'; rotateBtn.textContent = '🔄'; rotateBtn.title = 'Rotate 90°';
+            rotateBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
+            rotateBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            rotateBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elData.rotation = ((elData.rotation || 0) + 90) % 360; renderElements(); });
+
+            const dupBtn = document.createElement('button');
+            dupBtn.type = 'button'; dupBtn.textContent = '⧉'; dupBtn.title = 'Duplicate';
+            dupBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
+            dupBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            dupBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); pushUndo();
+                const copy = JSON.parse(JSON.stringify(elData));
+                copy.left += 15; copy.top += 15;
+                elements.push(copy);
+                renderElements();
+            });
+
+            const frontBtn = document.createElement('button');
+            frontBtn.type = 'button'; frontBtn.textContent = '⬆'; frontBtn.title = 'Bring to front';
+            frontBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
+            frontBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            frontBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elements.splice(index, 1); elements.push(elData); renderElements(); });
+
+            const backBtn = document.createElement('button');
+            backBtn.type = 'button'; backBtn.textContent = '⬇'; backBtn.title = 'Send to back';
+            backBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
+            backBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            backBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elements.splice(index, 1); elements.unshift(elData); renderElements(); });
+
+            const opacityInput = document.createElement('input');
+            opacityInput.type = 'range'; opacityInput.min = '10'; opacityInput.max = '100';
+            opacityInput.value = Math.round((elData.opacity !== undefined ? elData.opacity : 1) * 100);
+            opacityInput.title = 'Opacity';
+            opacityInput.style.cssText = 'width:50px; vertical-align:middle;';
+            opacityInput.addEventListener('mousedown', (e) => e.stopPropagation());
+            opacityInput.addEventListener('input', (e) => { elData.opacity = e.target.value / 100; box.style.opacity = elData.opacity; });
+
+            bar.appendChild(rotateBtn); bar.appendChild(dupBtn); bar.appendChild(frontBtn); bar.appendChild(backBtn); bar.appendChild(opacityInput);
+            box.appendChild(bar);
         }
 
         function renderElements() {
@@ -176,17 +249,22 @@
             const scale = getScale();
 
             elements.forEach((elData, index) => {
+                if (elData.rotation === undefined) elData.rotation = 0;
+                if (elData.opacity === undefined) elData.opacity = 1;
+
                 const box = document.createElement('div');
                 box.style.position = 'absolute';
                 box.style.left = (elData.left * scale.x) + 'px';
                 box.style.top = (elData.top * scale.y) + 'px';
                 box.style.width = (elData.width * scale.x) + 'px';
                 box.style.height = (elData.height * scale.y) + 'px';
-                box.style.border = '2px solid #7c3aed';
+                box.style.transform = `rotate(${elData.rotation}deg)`;
+                box.style.opacity = elData.opacity;
                 box.style.cursor = 'move';
                 box.style.pointerEvents = 'auto';
 
                 if (elData.type === 'image') {
+                    box.style.border = '2px solid #7c3aed';
                     const img = document.createElement('img');
                     img.src = elData.src;
                     img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain';
@@ -195,18 +273,37 @@
                     if (!elData.color) elData.color = '#ffffff';
                     box.style.background = elData.color;
                     box.style.border = '2px dashed #94a3b8';
-
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color';
-                    colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:32px; height:22px; border:none; padding:0; cursor:pointer;';
+                    colorPicker.type = 'color'; colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
+                    box.appendChild(colorPicker);
+                } else if (elData.type === 'rect' || elData.type === 'circle') {
+                    if (!elData.color) elData.color = '#3b82f6';
+                    box.style.background = elData.color;
+                    box.style.borderRadius = elData.type === 'circle' ? '50%' : '0';
+                    const colorPicker = document.createElement('input');
+                    colorPicker.type = 'color'; colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
+                    box.appendChild(colorPicker);
+                } else if (elData.type === 'line') {
+                    if (!elData.color) elData.color = '#000000';
+                    box.style.background = 'transparent';
+                    const lineDiv = document.createElement('div');
+                    lineDiv.style.cssText = `width:100%; height:4px; background:${elData.color}; margin-top:${(elData.height * scale.y / 2) - 2}px;`;
+                    box.appendChild(lineDiv);
+                    const colorPicker = document.createElement('input');
+                    colorPicker.type = 'color'; colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; lineDiv.style.background = elData.color; });
                     box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
                     box.style.border = '1px dashed #0891b2';
                     box.style.background = 'rgba(255,255,255,0.6)';
-
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
                     textInput.placeholder = 'Type here...';
@@ -222,50 +319,45 @@
                     box.appendChild(textInput);
 
                     const fontControls = document.createElement('div');
-                    fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:3px; background:#0891b2; border-radius:5px; padding:2px;';
-
-                    const decreaseBtn = document.createElement('button');
-                    decreaseBtn.textContent = 'A−'; decreaseBtn.type = 'button';
-                    decreaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
-                    decreaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-                    decreaseBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.max((elData.font_size || 16) - 2, 8); textInput.style.fontSize = elData.font_size + 'px'; });
-
-                    const increaseBtn = document.createElement('button');
-                    increaseBtn.textContent = 'A+'; increaseBtn.type = 'button';
-                    increaseBtn.style.cssText = 'font-size:11px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
-                    increaseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-                    increaseBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.min((elData.font_size || 16) + 2, 100); textInput.style.fontSize = elData.font_size + 'px'; });
-
-                    const textColorPicker = document.createElement('input');
-                    textColorPicker.type = 'color';
-                    textColorPicker.value = elData.color || '#000000';
-                    textColorPicker.style.cssText = 'width:22px; height:22px; border:none; padding:0; cursor:pointer;';
-                    textColorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
-                    textColorPicker.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
-
-                    fontControls.appendChild(decreaseBtn); fontControls.appendChild(increaseBtn); fontControls.appendChild(textColorPicker);
+                    fontControls.style.cssText = 'position:absolute; top:-26px; left:0; display:flex; gap:2px; background:#0891b2; border-radius:5px; padding:2px; z-index:6;';
+                    const decBtn = document.createElement('button'); decBtn.type='button'; decBtn.textContent='A−';
+                    decBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    decBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    decBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.max((elData.font_size||16)-2,8); textInput.style.fontSize = elData.font_size+'px'; });
+                    const incBtn = document.createElement('button'); incBtn.type='button'; incBtn.textContent='A+';
+                    incBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    incBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    incBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.min((elData.font_size||16)+2,100); textInput.style.fontSize = elData.font_size+'px'; });
+                    const txtColor = document.createElement('input'); txtColor.type='color'; txtColor.value = elData.color||'#000000';
+                    txtColor.style.cssText = 'width:20px; height:20px; border:none; padding:0; cursor:pointer;';
+                    txtColor.addEventListener('mousedown', (e) => e.stopPropagation());
+                    txtColor.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
+                    fontControls.appendChild(decBtn); fontControls.appendChild(incBtn); fontControls.appendChild(txtColor);
                     box.appendChild(fontControls);
                 }
 
                 const deleteBtn = document.createElement('div');
                 deleteBtn.textContent = '×'; deleteBtn.className = 'delete-handle';
-                deleteBtn.style.cssText = 'position:absolute; top:-12px; right:-12px; width:24px; height:24px; background:#b91c1c; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-weight:700;';
-                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); elements.splice(index, 1); renderElements(); });
+                deleteBtn.style.cssText = 'position:absolute; top:-12px; right:-12px; width:22px; height:22px; background:#b91c1c; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; font-weight:700; z-index:7;';
+                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elements.splice(index, 1); renderElements(); });
                 box.appendChild(deleteBtn);
 
                 const resizeHandle = document.createElement('div');
                 resizeHandle.className = 'resize-handle';
-                resizeHandle.style.cssText = 'position:absolute; bottom:-6px; right:-6px; width:14px; height:14px; background:#7c3aed; border-radius:3px; cursor:nwse-resize;';
+                resizeHandle.style.cssText = 'position:absolute; bottom:-6px; right:-6px; width:13px; height:13px; background:#7c3aed; border-radius:3px; cursor:nwse-resize; z-index:7;';
                 box.appendChild(resizeHandle);
+
+                addUniversalControls(box, elData, index);
 
                 elementLayer.appendChild(box);
                 makeDraggableResizable(box, elData);
             });
         }
 
-        pageImage.onload = renderElements;
-        if (pageImage.complete) renderElements();
-        window.addEventListener('resize', renderElements);
+        function renderAll() { renderTextBlocks(); renderElements(); }
+        docImage.onload = renderAll;
+        if (docImage.complete) renderAll();
+        window.addEventListener('resize', renderAll);
 
         document.getElementById('addImageBtn').addEventListener('click', () => document.getElementById('imageFileInput').click());
         document.getElementById('imageFileInput').addEventListener('change', async (e) => {
@@ -275,29 +367,19 @@
             formData.append('image', file);
             const response = await fetch(uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: formData });
             const data = await response.json();
-            if (data.success) {
-                elements.push({ type: 'image', src: data.url, left: 50, top: 50, width: 200, height: 200 });
-                renderElements();
-            } else { alert('Image upload failed.'); }
+            if (data.success) { pushUndo(); elements.push({ type: 'image', src: data.url, left: 50, top: 50, width: 200, height: 200 }); renderElements(); }
+            else { alert('Image upload failed.'); }
             e.target.value = '';
         });
 
-        document.getElementById('addCoverBtn').addEventListener('click', () => {
-            elements.push({ type: 'cover', left: 50, top: 50, width: 200, height: 80, color: '#ffffff' });
-            renderElements();
-        });
-
-        document.getElementById('addTextBtn').addEventListener('click', () => {
-            elements.push({ type: 'text', text: '', left: 50, top: 50, width: 240, height: 50, font_size: 20, color: '#000000' });
-            renderElements();
-        });
+        document.getElementById('addCoverBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'cover', left: 50, top: 50, width: 200, height: 80, color: '#ffffff' }); renderElements(); });
+        document.getElementById('addTextBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'text', text: '', left: 50, top: 50, width: 240, height: 50, font_size: 20, color: '#000000' }); renderElements(); });
+        document.getElementById('addRectBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'rect', left: 50, top: 50, width: 150, height: 100, color: '#3b82f6' }); renderElements(); });
+        document.getElementById('addCircleBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'circle', left: 50, top: 50, width: 120, height: 120, color: '#3b82f6' }); renderElements(); });
+        document.getElementById('addLineBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'line', left: 50, top: 50, width: 180, height: 4, color: '#000000' }); renderElements(); });
 
         document.getElementById('aiAssistBtn').addEventListener('click', () => { document.getElementById('aiPanel').style.display = 'flex'; });
-        document.getElementById('aiCloseBtn').addEventListener('click', () => {
-            document.getElementById('aiPanel').style.display = 'none';
-            document.getElementById('aiResultBox').style.display = 'none';
-            document.getElementById('aiError').style.display = 'none';
-        });
+        document.getElementById('aiCloseBtn').addEventListener('click', () => { document.getElementById('aiPanel').style.display = 'none'; document.getElementById('aiResultBox').style.display = 'none'; document.getElementById('aiError').style.display = 'none'; });
 
         document.getElementById('aiGenerateBtn').addEventListener('click', async () => {
             const instruction = document.getElementById('aiInstruction').value.trim();
@@ -306,29 +388,23 @@
             const loadingBox = document.getElementById('aiLoading');
             const resultBox = document.getElementById('aiResultBox');
             errorBox.style.display = 'none'; resultBox.style.display = 'none';
-
             if (!instruction) { errorBox.textContent = 'Please enter an instruction.'; errorBox.style.display = 'block'; return; }
             loadingBox.style.display = 'block';
-
             const formData = new URLSearchParams();
             formData.append('instruction', instruction);
             formData.append('context_text', contextText);
-
             try {
                 const response = await fetch(aiAssistUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
                 const data = await response.json();
                 loadingBox.style.display = 'none';
                 if (data.success) { document.getElementById('aiResultText').value = data.result; resultBox.style.display = 'block'; }
                 else { errorBox.textContent = data.error || 'Something went wrong.'; errorBox.style.display = 'block'; }
-            } catch (err) {
-                loadingBox.style.display = 'none';
-                errorBox.textContent = 'Network error. Please try again.';
-                errorBox.style.display = 'block';
-            }
+            } catch (err) { loadingBox.style.display = 'none'; errorBox.textContent = 'Network error.'; errorBox.style.display = 'block'; }
         });
 
         document.getElementById('aiInsertBtn').addEventListener('click', () => {
             const resultText = document.getElementById('aiResultText').value;
+            pushUndo();
             elements.push({ type: 'text', text: resultText, left: 50, top: 50, width: 260, height: 70, font_size: 20, color: '#000000' });
             renderElements();
             document.getElementById('aiPanel').style.display = 'none';
@@ -337,6 +413,7 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             document.getElementById('elementsJson').value = JSON.stringify(elements);
+            document.getElementById('textBlocksJson').value = JSON.stringify(textBlocks);
             document.getElementById('hiddenForm').submit();
         });
     </script>

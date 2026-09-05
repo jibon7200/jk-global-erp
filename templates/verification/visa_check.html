@@ -1,0 +1,64 @@
+{% load custom_filters %}
+{% extends 'base.html' %}
+
+{% block title %}Visa Checking{% endblock %}
+{% block page_title %}Status Checking — Visa{% endblock %}
+
+{% block content %}
+
+    <div style="margin-bottom:18px;">
+        <a href="{% url 'verification:status_home' %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">← Back to Status Checking</a>
+    </div>
+
+    <div class="card" style="max-width:520px;">
+
+        <form method="get" style="margin-bottom:20px;">
+            <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Select Country</label>
+            <select name="country" onchange="this.form.submit()" style="width:100%; padding:11px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px;">
+                <option value="">-- Select a country --</option>
+                {% for config in configs %}
+                    <option value="{{ config.pk }}" {% if selected_config.pk == config.pk %}selected{% endif %}>{{ config.country_or_provider }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        {% if not configs %}
+            <p style="color:#94a3b8; font-size:13px;">No countries configured yet. Ask Admin to add one from the Django Admin panel (Verification Configurations → Visa).</p>
+        {% endif %}
+
+        {% if selected_config %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="country" value="{{ selected_config.pk }}">
+
+                {% for field in selected_config.required_fields %}
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">{{ field.label }}</label>
+                    <input type="text" name="{{ field.name }}" value="{{ submitted_values|get_item:field.name }}" style="width:100%; padding:11px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px;" required>
+                </div>
+                {% endfor %}
+
+                <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                    Check Status
+                </button>
+            </form>
+        {% endif %}
+
+        {% if result %}
+            <div style="margin-top:22px; padding:16px; border-radius:10px; background:#fef3c7; border:1px solid #fde68a;">
+                <div style="font-size:13px; font-weight:700; color:#92400e; margin-bottom:6px;">Status: {{ result.status }}</div>
+                <div style="font-size:12px; color:#78350f; margin-bottom:12px;">{{ result.message }}</div>
+                {% if result.show_website_button and selected_config.official_url %}
+                    <a href="{{ selected_config.official_url }}" target="_blank" style="display:inline-block; background:#1e3a5f; color:#fff; padding:9px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+                        🔗 OPEN OFFICIAL VERIFICATION WEBSITE
+                    </a>
+                {% endif %}
+                {% if selected_config.instructions %}
+                    <div style="font-size:11px; color:#94a3b8; margin-top:10px;">{{ selected_config.instructions }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}

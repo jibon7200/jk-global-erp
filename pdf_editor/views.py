@@ -1,6 +1,9 @@
 import uuid
 import json
 import base64
+import os
+import subprocess
+import tempfile
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -11,19 +14,65 @@ from django.core.files.storage import default_storage
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.conf import settings as django_settings
-import os
-import subprocess
-import tempfile
-from pdf2docx import Converter
 
 import fitz  # PyMuPDF
 from weasyprint import HTML
+from pdf2docx import Converter
+import pytesseract
+from PIL import Image
+from io import BytesIO
+
+pytesseract.pytesseract.tesseract_cmd = django_settings.TESSERACT_CMD_PATH
 
 from core.models import SiteSettings
 from core.ai_helper import ask_ai
 from .models import PDFProject, PDFSourceFile
 
-RENDER_SCALE = 2.0  # used consistently for editor background + export background
+RENDER_SCALE = 2.0
+
+
+def _extract_text_lines_from_pixmap(pixmap):
+    """
+    Runs OCR (Bangla + English) on a rendered PDF page image and
+    groups detected words into LINES with their position — same
+    approach used in the Document Editor, so PDF page text can be
+    edited/erased the same way.
+    """
+    img_bytes = pixmap.tobytes('png')
+    image = Image.open(BytesIO(img_bytes))
+
+    data = pytesseract.image_to_data(image, lang='ben+eng', output_type=pytesseract.Output.DICT)
+
+    lines = {}
+    n_boxes = len(data['text'])
+
+    for i in range(n_boxes):
+        text = data['text'][i].strip()
+        if not text:
+            continue
+
+        key = (data['block_num'][i], data['par_num'][i], data['line_num'][i])
+        left, top = data['left'][i], data['top'][i]
+        width, height = data['width'][i], data['height'][i]
+
+        if key not in lines:
+            lines[key] = {'text': text, 'left': left, 'top': top, 'right': left + width, 'bottom': top + height}
+        else:
+            lines[key]['text'] += ' ' + text
+            lines[key]['right'] = max(lines[key]['right'], left + width)
+            lines[key]['bottom'] = max(lines[key]['bottom'], top + height)
+
+    blocks = []
+    for line in lines.values():
+        blocks.append({
+            'text': line['text'],
+            'new_text': '',
+            'left': line['left'],
+            'top': line['top'],
+            'width': line['right'] - line['left'],
+            'height': line['bottom'] - line['top'],
+        })
+    return blocks
 
 
 def _base_context(request, active_menu):
@@ -161,11 +210,6 @@ def _find_page_entry(project, page_id):
 
 @login_required
 def page_editor_view(request, pk, page_id):
-    """
-    Full-screen editor for ONE specific page — lets the user add
-    text boxes, images, and cover boxes on top of that page,
-    exactly like the Document Editor, plus AI assist.
-    """
     project = get_object_or_404(PDFProject, pk=pk)
     page_entry = _find_page_entry(project, page_id)
 
@@ -175,8 +219,10 @@ def page_editor_view(request, pk, page_id):
 
     if request.method == 'POST':
         elements_json = request.POST.get('elements_json', '[]')
+        text_blocks_json = request.POST.get('text_blocks_json', '[]')
         try:
             page_entry['elements'] = json.loads(elements_json)
+            page_entry['text_blocks'] = json.loads(text_blocks_json)
             project.save()
             messages.success(request, 'Page changes saved.')
         except json.JSONDecodeError:
@@ -189,6 +235,18 @@ def page_editor_view(request, pk, page_id):
     page.set_rotation(page_entry.get('rotation', 0))
     pixel_width = int(page.rect.width * RENDER_SCALE)
     pixel_height = int(page.rect.height * RENDER_SCALE)
+
+    # Run OCR only ONCE per page (first time it's opened for editing).
+    # After that, the user's edits (including deletions) are preserved
+    # and reloaded — OCR is never re-run over saved edits.
+    if 'text_blocks' not in page_entry:
+        try:
+            pixmap = page.get_pixmap(matrix=fitz.Matrix(RENDER_SCALE, RENDER_SCALE))
+            page_entry['text_blocks'] = _extract_text_lines_from_pixmap(pixmap)
+        except Exception:
+            page_entry['text_blocks'] = []
+        project.save()
+
     doc.close()
 
     context = _base_context(request, 'pdf')
@@ -197,12 +255,12 @@ def page_editor_view(request, pk, page_id):
     context['image_width'] = pixel_width
     context['image_height'] = pixel_height
     context['elements_json'] = json.dumps(page_entry.get('elements', []))
+    context['text_blocks_json'] = json.dumps(page_entry.get('text_blocks', []))
     return render(request, 'pdf_editor/page_editor.html', context)
 
 
 @login_required
 def page_element_image_upload_view(request, pk):
-    """AJAX endpoint: uploads an image to place onto a PDF page."""
     project = get_object_or_404(PDFProject, pk=pk)
 
     if request.method == 'POST' and request.FILES.get('image'):
@@ -220,7 +278,6 @@ def page_element_image_upload_view(request, pk):
 @login_required
 @require_POST
 def pdf_ai_assist_view(request, pk):
-    """AJAX endpoint: same free Gemini AI assist, reused for PDF Editor."""
     get_object_or_404(PDFProject, pk=pk)
     instruction = request.POST.get('instruction', '').strip()
     context_text = request.POST.get('context_text', '').strip()
@@ -235,23 +292,13 @@ def pdf_ai_assist_view(request, pk):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
-def project_export_view(request, pk):
+def _build_export_pdf_bytes(request, project):
     """
-    Builds the final PDF. Pages with NO added elements are inserted
-    directly (fast, preserves original vector quality). Pages WITH
-    elements are rendered as: background image of that page + the
-    text/image/cover elements on top (using WeasyPrint + Noto Sans
-    Bengali, same reliable method as Document Editor), then that
-    single rendered page is inserted instead — so Bangla text always
-    shapes correctly.
+    Shared logic: builds the final PDF bytes from the project's
+    current page list (order, rotation, and per-page elements).
+    Used by BOTH the normal Export button and Convert-to-Word,
+    so both always reflect the exact same up-to-date content.
     """
-    project = get_object_or_404(PDFProject, pk=pk)
-
-    if not project.pages:
-        messages.error(request, 'This project has no pages to export.')
-        return redirect('pdf_editor:project_edit', pk=project.pk)
-
     output_doc = fitz.open()
     source_docs = {}
 
@@ -264,9 +311,10 @@ def project_export_view(request, pk):
 
         source_doc = source_docs[source_id]
         elements = page_entry.get('elements', [])
+        text_blocks = page_entry.get('text_blocks', [])
+        has_edits = bool(elements) or bool(text_blocks)
 
-        if not elements:
-            # No edits on this page — insert it directly, unchanged.
+        if not has_edits:
             output_doc.insert_pdf(
                 source_doc,
                 from_page=page_entry['page_number'],
@@ -275,7 +323,6 @@ def project_export_view(request, pk):
             new_page = output_doc[-1]
             new_page.set_rotation(page_entry.get('rotation', 0))
         else:
-            # This page has edits — rasterize + overlay via WeasyPrint.
             page = source_doc[page_entry['page_number']]
             page.set_rotation(page_entry.get('rotation', 0))
 
@@ -289,18 +336,28 @@ def project_export_view(request, pk):
 
             elements_pt = []
             for el in elements:
-                elements_pt.append({
-                    **el,
-                    'left': el['left'] / RENDER_SCALE,
-                    'top': el['top'] / RENDER_SCALE,
-                    'width': el['width'] / RENDER_SCALE,
-                    'height': el['height'] / RENDER_SCALE,
-                    'font_size': el.get('font_size', 16) / RENDER_SCALE if el.get('type') == 'text' else None,
-                })
+                converted = dict(el)
+                converted['left'] = el['left'] / RENDER_SCALE
+                converted['top'] = el['top'] / RENDER_SCALE
+                converted['width'] = el['width'] / RENDER_SCALE
+                converted['height'] = el['height'] / RENDER_SCALE
+                if el.get('type') == 'text':
+                    converted['font_size'] = el.get('font_size', 16) / RENDER_SCALE
+                elements_pt.append(converted)
+
+            text_blocks_pt = []
+            for block in text_blocks:
+                converted_block = dict(block)
+                converted_block['left'] = block['left'] / RENDER_SCALE
+                converted_block['top'] = block['top'] / RENDER_SCALE
+                converted_block['width'] = block['width'] / RENDER_SCALE
+                converted_block['height'] = block['height'] / RENDER_SCALE
+                text_blocks_pt.append(converted_block)
 
             html_string = render_to_string('pdf_editor/page_export_template.html', {
                 'image_data_uri': image_data_uri,
                 'elements': elements_pt,
+                'text_blocks': text_blocks_pt,
                 'page_width': point_width,
                 'page_height': point_height,
                 'font_path': django_settings.BASE_DIR / 'static' / 'fonts' / 'NotoSansBengali-Regular.ttf',
@@ -319,6 +376,19 @@ def project_export_view(request, pk):
     for doc in source_docs.values():
         doc.close()
 
+    return output_bytes
+
+
+@login_required
+def project_export_view(request, pk):
+    project = get_object_or_404(PDFProject, pk=pk)
+
+    if not project.pages:
+        messages.error(request, 'This project has no pages to export.')
+        return redirect('pdf_editor:project_edit', pk=project.pk)
+
+    output_bytes = _build_export_pdf_bytes(request, project)
+
     filename = f'edited_pdf_{project.pk}.pdf'
     project.exported_file.save(filename, ContentFile(output_bytes), save=True)
 
@@ -328,29 +398,31 @@ def project_export_view(request, pk):
 
 @login_required
 def project_convert_to_word_view(request, pk):
-    """
-    Converts the project's CURRENT exported PDF into an editable
-    .docx file for download. If no export exists yet, exports one
-    first automatically. The user downloads this, edits it in
-    Microsoft Word or LibreOffice Writer (or any Word-compatible
-    app), then can upload the edited version to convert it back.
-    """
     project = get_object_or_404(PDFProject, pk=pk)
 
-    if not project.exported_file:
-        return project_export_view(request, pk)
+    if not project.pages:
+        messages.error(request, 'This project has no pages to convert.')
+        return redirect('pdf_editor:project_edit', pk=project.pk)
 
-    pdf_path = project.exported_file.path
+    pdf_bytes = _build_export_pdf_bytes(request, project)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
+        source_pdf_path = os.path.join(tmp_dir, 'source.pdf')
+        with open(source_pdf_path, 'wb') as f:
+            f.write(pdf_bytes)
+
         docx_path = os.path.join(tmp_dir, f'project_{project.pk}.docx')
 
         try:
-            converter = Converter(pdf_path)
+            converter = Converter(source_pdf_path)
             converter.convert(docx_path)
             converter.close()
         except Exception as e:
             messages.error(request, f'Could not convert to Word: {e}')
+            return redirect('pdf_editor:project_edit', pk=project.pk)
+
+        if not os.path.exists(docx_path):
+            messages.error(request, 'Word conversion did not produce a file.')
             return redirect('pdf_editor:project_edit', pk=project.pk)
 
         with open(docx_path, 'rb') as f:
@@ -366,17 +438,18 @@ def project_convert_to_word_view(request, pk):
 
 @login_required
 def project_upload_word_view(request, pk):
-    """
-    Accepts an edited .docx file and converts it back into a PDF
-    using LibreOffice (free, runs locally, no cloud service needed).
-    The result REPLACES this project's exported_file — the original
-    source PDFs used to build the project remain untouched, so the
-    page-editing workflow is still available afterward if needed.
-    """
     project = get_object_or_404(PDFProject, pk=pk)
 
     if request.method != 'POST' or not request.FILES.get('docx_file'):
         messages.error(request, 'Please select a .docx file to upload.')
+        return redirect('pdf_editor:project_edit', pk=project.pk)
+
+    if not os.path.exists(django_settings.LIBREOFFICE_PATH):
+        messages.error(
+            request,
+            f'LibreOffice was not found at: {django_settings.LIBREOFFICE_PATH}. '
+            f'Please install LibreOffice or fix LIBREOFFICE_PATH in your .env file.'
+        )
         return redirect('pdf_editor:project_edit', pk=project.pk)
 
     uploaded_docx = request.FILES['docx_file']
@@ -394,19 +467,17 @@ def project_upload_word_view(request, pk):
                     '--headless', '--convert-to', 'pdf',
                     '--outdir', tmp_dir, docx_path
                 ],
-                capture_output=True, text=True, timeout=120
+                capture_output=True, text=True, timeout=180
             )
-        except FileNotFoundError:
-            messages.error(request, 'LibreOffice was not found. Please check LIBREOFFICE_PATH in your .env file.')
-            return redirect('pdf_editor:project_edit', pk=project.pk)
         except subprocess.TimeoutExpired:
-            messages.error(request, 'Conversion took too long and timed out. Please try again.')
+            messages.error(request, 'Conversion timed out after 3 minutes. Please try a smaller file.')
             return redirect('pdf_editor:project_edit', pk=project.pk)
 
         converted_pdf_path = os.path.join(tmp_dir, 'uploaded.pdf')
 
         if not os.path.exists(converted_pdf_path):
-            messages.error(request, f'Conversion failed: {result.stderr}')
+            error_detail = result.stderr.strip() or result.stdout.strip() or 'Unknown LibreOffice error.'
+            messages.error(request, f'Conversion failed: {error_detail}')
             return redirect('pdf_editor:project_edit', pk=project.pk)
 
         with open(converted_pdf_path, 'rb') as f:
@@ -418,9 +489,10 @@ def project_upload_word_view(request, pk):
     messages.success(request, 'Word document converted back to PDF successfully.')
     return redirect('pdf_editor:project_edit', pk=project.pk)
 
-
-
-
-
-
-
+@login_required
+@require_POST
+def project_delete_view(request, pk):
+    project = get_object_or_404(PDFProject, pk=pk)
+    project.delete()
+    messages.success(request, 'PDF project deleted.')
+    return redirect('pdf_editor:project_list')

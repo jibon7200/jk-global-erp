@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Status Checking{% endblock %}
+{% block page_title %}Status Checking{% endblock %}
+
+{% block content %}
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
+
+        <a href="{% url 'verification:air_ticket_check' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:28px; margin-bottom:10px;">✈️</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">Air Ticket Checking</div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">Verify PNR/Ticket Number via airline official channels</div>
+        </a>
+
+        <a href="{% url 'verification:passport_check' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:28px; margin-bottom:10px;">📘</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">Passport Status Checking</div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">Country-based passport verification</div>
+        </a>
+
+        <a href="{% url 'verification:visa_check' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:28px; margin-bottom:10px;">🛂</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">Visa Status Checking</div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">Country-based visa verification</div>
+        </a>
+
+        <a href="{% url 'ocr:scan_upload' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:28px; margin-bottom:10px;">📸</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">Passport OCR Scan</div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">Extract data from a passport image (MRZ)</div>
+        </a>
+
+        <a href="{% url 'verification:manpower_check' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:28px; margin-bottom:10px;">👷</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;">Manpower Status Checking</div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">Search our own manpower records</div>
+        </a>
+
+    </div>
+
+{% endblock %}

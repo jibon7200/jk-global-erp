@@ -21,20 +21,6 @@
             ⬇ Export Final PDF
         </a>
 
-        {% if project.exported_file %}
-        <a href="{{ project.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-            📄 View Last Export
-        </a>
-        {% endif %}
-
-                {% if project.exported_file %}
-        <a href="{{ project.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-            📄 View Last Export
-        </a>
-        {% endif %}
-
-        <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
-
         <a href="{% url 'pdf_editor:project_convert_to_word' project.pk %}" style="background:#2563eb; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
             📝 Convert to Word (Download)
         </a>
@@ -43,11 +29,17 @@
             ⬆ Upload Edited Word → PDF
         </button>
 
+        {% if project.exported_file %}
+        <a href="{{ project.exported_file.url }}" target="_blank" style="background:#e2e8f0; color:#334155; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+            📄 View Last Export
+        </a>
+        {% endif %}
+
         <span id="pageCount" style="font-size:13px; color:#64748b; margin-left:auto;"></span>
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:12px;">
-        ⚠️ Drag a page to reorder it. Use the rotate/delete buttons on each page. Changes save automatically.
+        ⚠️ Drag a page to reorder it. Use the rotate/delete buttons on each page. Click the ✏ icon to add text/images/shapes on that page. Changes save automatically.
     </div>
 
     <div id="pageGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:16px;"></div>
@@ -57,24 +49,10 @@
         <input type="file" name="files" id="mergeFilesActual" multiple>
     </form>
 
-        <form id="mergeForm" method="post" action="{% url 'pdf_editor:project_add_files' project.pk %}" enctype="multipart/form-data" style="display:none;">
-        {% csrf_token %}
-        <input type="file" name="files" id="mergeFilesActual" multiple>
-    </form>
-
     <form id="wordUploadForm" method="post" action="{% url 'pdf_editor:project_upload_word' project.pk %}" enctype="multipart/form-data" style="display:none;">
         {% csrf_token %}
         <input type="file" name="docx_file" id="wordFileActual" accept=".docx">
     </form>
-
-        document.getElementById('uploadWordBtn').addEventListener('click', () => {
-            document.getElementById('wordFileActual').click();
-        });
-        document.getElementById('wordFileActual').addEventListener('change', () => {
-            document.getElementById('wordUploadForm').submit();
-        });
-
-    
 
     <script>
         let pages = {{ project.pages|safe|default:"[]" }};
@@ -126,7 +104,7 @@
 
                 const editBtn = document.createElement('a');
                 editBtn.textContent = '✏';
-                editBtn.title = 'Add text/image/cover to this page';
+                editBtn.title = 'Add text/image/shapes to this page';
                 editBtn.href = `/pdf/${projectId}/page/${page.id}/edit/`;
                 editBtn.style.cssText = 'background:#0891b2; color:#fff; text-decoration:none; border-radius:5px; width:28px; height:28px; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center;';
                 controls.appendChild(editBtn);
@@ -184,6 +162,13 @@
             for (const file of e.target.files) dt.items.add(file);
             document.getElementById('mergeFilesActual').files = dt.files;
             document.getElementById('mergeForm').submit();
+        });
+
+        document.getElementById('uploadWordBtn').addEventListener('click', () => {
+            document.getElementById('wordFileActual').click();
+        });
+        document.getElementById('wordFileActual').addEventListener('change', () => {
+            document.getElementById('wordUploadForm').submit();
         });
     </script>
 

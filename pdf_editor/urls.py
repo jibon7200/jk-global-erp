@@ -16,4 +16,5 @@ urlpatterns = [
     path('thumbnail/<int:source_id>/<int:page_number>/', views.page_thumbnail_view, name='page_thumbnail'),
     path('<int:pk>/convert-to-word/', views.project_convert_to_word_view, name='project_convert_to_word'),
     path('<int:pk>/upload-word/', views.project_upload_word_view, name='project_upload_word'),
+    path('<int:pk>/delete/', views.project_delete_view, name='project_delete'),
 ]
