@@ -10,5 +10,5 @@ urlpatterns = [
     path('<int:pk>/export/', views.document_export_view, name='document_export'),
     path('<int:pk>/upload-element/', views.element_image_upload_view, name='element_image_upload'),
     path('<int:pk>/ai-assist/', views.document_ai_assist_view, name='document_ai_assist'),
-    path('<int:pk>/ai-image/', views.document_ai_image_view, name='document_ai_image'),
+
 ]

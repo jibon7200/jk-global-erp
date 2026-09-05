@@ -44,9 +44,7 @@
             ✨ Ask AI
         </button>
 
-        <button id="aiImageBtn" style="background:linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; padding:10px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            🖼✨ AI Image
-        </button>
+
 
         <span style="width:1px; height:24px; background:#e2e8f0; margin:0 4px;"></span>
 
@@ -115,8 +113,19 @@
             <h3 style="font-size:16px; color:#0f172a; margin-bottom:6px;">🖼✨ AI Image Generator</h3>
             <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">Limited to {{ ai_image_daily_limit }} image(s) per day.</p>
 
-            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Describe the image you want</label>
-            <textarea id="aiImagePrompt" placeholder="e.g. A simple flat-style icon of a milk carton, white background" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
+                Select an image to edit (optional — leave empty to generate a new image)
+            </label>
+            <input type="file" id="aiImageReferenceInput" accept="image/*" style="width:100%; padding:8px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:6px;">
+            <div id="aiImageReferencePreviewWrapper" style="display:none; margin-bottom:12px;">
+                <img id="aiImageReferencePreview" style="max-width:120px; max-height:120px; border-radius:8px; border:1px solid #e2e8f0;">
+                <button id="aiImageReferenceClearBtn" type="button" style="background:#e2e8f0; color:#334155; padding:4px 10px; border:none; border-radius:6px; font-size:11px; cursor:pointer; margin-left:8px;">Remove</button>
+            </div>
+
+            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">
+                Describe what you want (new image, or how to edit the selected image)
+            </label>
+            <textarea id="aiImagePrompt" placeholder="e.g. 'A simple flat-style icon of a milk carton' OR (with an image selected) 'Remove the background and make it black and white'" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
 
             <button id="aiImageGenerateBtn" type="button" style="background:#ef4444; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Generate Image</button>
             <button id="aiImageCloseBtn" type="button" style="background:#e2e8f0; color:#334155; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; margin-left:8px;">Close</button>
@@ -485,18 +494,28 @@
         });
 
         
-        // AI Image Panel
-        const aiImageUrl = "{% url 'documents:document_ai_image' doc.pk %}";
-        let lastGeneratedImageUrl = null;
 
-        document.getElementById('aiImageBtn').addEventListener('click', () => {
-            document.getElementById('aiImagePanel').style.display = 'flex';
+
+        let selectedReferenceFile = null;
+
+        document.getElementById('aiImageReferenceInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            selectedReferenceFile = file;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                document.getElementById('aiImageReferencePreview').src = evt.target.result;
+                document.getElementById('aiImageReferencePreviewWrapper').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
         });
-        document.getElementById('aiImageCloseBtn').addEventListener('click', () => {
-            document.getElementById('aiImagePanel').style.display = 'none';
-            document.getElementById('aiImagePreviewBox').style.display = 'none';
-            document.getElementById('aiImageError').style.display = 'none';
-        });
+
+        document.getElementById('aiImageReferenceClearBtn').addEventListener('click', () => {
+            selectedReferenceFile = null;
+            document.getElementById('aiImageReferenceInput').value = '';
+            document.getElementById('aiImageReferencePreviewWrapper').style.display = 'none';
+        });        
 
         document.getElementById('aiImageGenerateBtn').addEventListener('click', async () => {
             const prompt = document.getElementById('aiImagePrompt').value.trim();
@@ -508,23 +527,36 @@
             previewBox.style.display = 'none';
 
             if (!prompt) {
-                errorBox.textContent = 'Please describe the image you want.';
+                errorBox.textContent = 'Please describe what you want.';
                 errorBox.style.display = 'block';
                 return;
             }
 
             loadingBox.style.display = 'block';
 
-            const formData = new URLSearchParams();
+            const formData = new FormData();
             formData.append('prompt', prompt);
+            if (selectedReferenceFile) {
+                formData.append('reference_image', selectedReferenceFile);
+            }
 
             try {
                 const response = await fetch(aiImageUrl, {
                     method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 'X-CSRFToken': csrfToken },
                     body: formData,
                 });
-                const data = await response.json();
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    loadingBox.style.display = 'none';
+                    errorBox.textContent = `Server error (status ${response.status}). Check the terminal running your server for details.`;
+                    errorBox.style.display = 'block';
+                    return;
+                }
+
                 loadingBox.style.display = 'none';
 
                 if (data.success) {
@@ -537,7 +569,7 @@
                 }
             } catch (err) {
                 loadingBox.style.display = 'none';
-                errorBox.textContent = 'Network error. Please try again.';
+                errorBox.textContent = 'Network error — could not reach the server. Check your internet connection.';
                 errorBox.style.display = 'block';
             }
         });

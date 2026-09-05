@@ -229,15 +229,20 @@ def document_ai_assist_view(request, pk):
 @require_POST
 def document_ai_image_view(request, pk):
     """
-    Generates an AI image (Gemini "Nano Banana") from a text prompt
-    and saves it so it can be added as a new image element. Enforces
-    a small daily quota per user since this is not truly unlimited/free.
+    Generates OR edits an AI image (Gemini "Nano Banana"):
+    - If the user uploads a reference image, the AI EDITS that image
+      according to the description (image-to-image editing).
+    - If no reference image is given, the AI generates a brand-new
+      image from the description alone (text-to-image).
+    Enforces a small daily quota per user since this is not truly
+    unlimited/free.
     """
     doc = get_object_or_404(DocumentEdit, pk=pk)
     prompt = request.POST.get('prompt', '').strip()
+    reference_image = request.FILES.get('reference_image')
 
     if not prompt:
-        return JsonResponse({'success': False, 'error': 'Please describe the image you want.'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Please describe what you want.'}, status=400)
 
     if not check_and_increment_ai_image_quota(request.user):
         return JsonResponse({
@@ -246,10 +251,11 @@ def document_ai_image_view(request, pk):
         }, status=429)
 
     try:
-        image_bytes = generate_ai_image(prompt)
+        reference_bytes = reference_image.read() if reference_image else None
+        image_bytes = generate_ai_image(prompt, reference_bytes)
         filename = f'documents/ai_images/{doc.pk}/{uuid.uuid4().hex}.png'
         path = default_storage.save(filename, ContentFile(image_bytes))
         url = default_storage.url(path)
         return JsonResponse({'success': True, 'url': url})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)    
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)   
