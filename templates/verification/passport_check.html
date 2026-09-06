@@ -1,4 +1,3 @@
-{% load custom_filters %}
 {% extends 'base.html' %}
 
 {% block title %}Passport Checking{% endblock %}
@@ -31,10 +30,10 @@
                 {% csrf_token %}
                 <input type="hidden" name="country" value="{{ selected_config.pk }}">
 
-                {% for field in selected_config.required_fields %}
+                {% for field in display_fields %}
                 <div style="margin-bottom:16px;">
                     <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">{{ field.label }}</label>
-                    <input type="text" name="{{ field.name }}" value="{{ submitted_values|get_item:field.name }}" style="width:100%; padding:11px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px;" required>
+                    <input type="text" name="{{ field.name }}" value="{{ field.value }}" style="width:100%; padding:11px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px;" required>
                 </div>
                 {% endfor %}
 

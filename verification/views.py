@@ -24,29 +24,24 @@ def status_home_view(request):
 
 
 def _handle_country_based_check(request, service_type, template_name):
-    """
-    Shared logic for Visa and Passport checking:
-    1. User selects a country.
-    2. The form shows ONLY the fields configured for that country.
-    3. On submit, we NEVER claim a verified result ourselves —
-       we honestly show the configured method (official website
-       link, or "Manual Verification Required") because no real
-       government API is integrated yet. This follows the project
-       rule: never invent verification results.
-    """
     configs = VerificationConfig.objects.filter(service_type=service_type, is_active=True)
     selected_config = None
-    submitted_values = {}
     result = None
+    display_fields = []
 
     country_id = request.GET.get('country') or request.POST.get('country')
     if country_id:
         selected_config = configs.filter(pk=country_id).first()
 
-    if request.method == 'POST' and selected_config:
+    if selected_config:
         for field in selected_config.required_fields:
-            submitted_values[field['name']] = request.POST.get(field['name'], '')
+            display_fields.append({
+                'name': field['name'],
+                'label': field['label'],
+                'value': request.POST.get(field['name'], ''),
+            })
 
+    if request.method == 'POST' and selected_config:
         if selected_config.method == VerificationConfig.Method.WEBSITE:
             result = {
                 'status': 'Manual Verification Required',
@@ -54,7 +49,6 @@ def _handle_country_based_check(request, service_type, template_name):
                 'show_website_button': True,
             }
         elif selected_config.method == VerificationConfig.Method.API:
-            # Placeholder for future real API integration — never fabricate a result.
             result = {
                 'status': 'Unable to Verify',
                 'message': 'An official API is planned for this country but is not yet connected. Please verify manually via the official website.',
@@ -70,7 +64,7 @@ def _handle_country_based_check(request, service_type, template_name):
     context = _base_context(request, 'status')
     context['configs'] = configs
     context['selected_config'] = selected_config
-    context['submitted_values'] = submitted_values
+    context['display_fields'] = display_fields
     context['result'] = result
     return render(request, template_name, context)
 
