@@ -186,6 +186,33 @@ class Command(BaseCommand):
                 'official_url': 'https://imuga.immigration.gov.mv/traveller',
                 'instructions': 'IMUGA Traveller Declaration — mandatory pre-arrival system, free of charge.',
             },
+                        {
+                'country_or_provider': 'Japan',
+                'required_fields': [
+                    {'name': 'registered_email', 'label': 'Registered Email (eVisa account)'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.evisa.mofa.go.jp/',
+                'instructions': 'JAPAN eVISA — Ministry of Foreign Affairs. Only for eligible nationalities/residencies; check MOFA eligibility list first.',
+            },
+            {
+                'country_or_provider': 'Pakistan',
+                'required_fields': [
+                    {'name': 'application_tracking_id', 'label': 'Application Tracking ID'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.nadra.gov.pk/',
+                'instructions': 'NADRA e-Visa portal, Ministry of Interior, Pakistan.',
+            },
+            {
+                'country_or_provider': 'Hong Kong',
+                'required_fields': [
+                    {'name': 'reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.immd.gov.hk/eng/e-visa.html',
+                'instructions': 'Hong Kong Immigration Department (ImmD) e-Visa arrangement.',
+            },
 
 
 
@@ -193,7 +220,7 @@ class Command(BaseCommand):
 
 
 
-            
+
         ]
 
         created_count = 0
