@@ -80,6 +80,59 @@ class Command(BaseCommand):
                 'official_url': 'https://www.ica.gov.sg/',
                 'instructions': 'Immigration and Checkpoints Authority (ICA) of Singapore.',
             },
+                        {
+                'country_or_provider': 'Egypt',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa2egypt.gov.eg/',
+                'instructions': 'Official Egypt eVisa portal.',
+            },
+            {
+                'country_or_provider': 'South Korea (EPS Worker Visa)',
+                'required_fields': [
+                    {'name': 'application_number', 'label': 'Application/Registration Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.eps.go.kr/',
+                'instructions': 'Employment Permit System (EPS) portal for foreign worker (E-9) visas.',
+            },
+            {
+                'country_or_provider': 'United Kingdom',
+                'required_fields': [
+                    {'name': 'visa_reference_number', 'label': 'Visa Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.gov.uk/view-prove-immigration-status',
+                'instructions': 'UK Visas and Immigration (UKVI) — view/prove immigration status (eVisa) service.',
+            },
+            {
+                'country_or_provider': 'USA',
+                'required_fields': [
+                    {'name': 'case_number', 'label': 'Visa Case Number'},
+                ],
+                'official_url': 'https://ceac.state.gov/CEAC/',
+                'instructions': 'U.S. Department of State Consular Electronic Application Center (CEAC).',
+            },
+            {
+                'country_or_provider': 'Canada',
+                'required_fields': [
+                    {'name': 'uci_or_application_number', 'label': 'UCI / Application Number'},
+                    {'name': 'date_of_birth', 'label': 'Date of Birth'},
+                ],
+                'official_url': 'https://www.canada.ca/en/immigration-refugees-citizenship/services/application/check-status.html',
+                'instructions': 'Immigration, Refugees and Citizenship Canada (IRCC) official status checker.',
+            },
+            {
+                'country_or_provider': 'Australia (VEVO)',
+                'required_fields': [
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                    {'name': 'reference_number', 'label': 'Transaction/Visa Grant Number'},
+                ],
+                'official_url': 'https://immi.homeaffairs.gov.au/visas/already-have-a-visa/check-visa-details-and-conditions/check-conditions-online',
+                'instructions': 'Visa Entitlement Verification Online (VEVO) by Australian Department of Home Affairs.',
+            },
         ]
 
         created_count = 0
