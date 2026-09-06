@@ -133,6 +133,67 @@ class Command(BaseCommand):
                 'official_url': 'https://immi.homeaffairs.gov.au/visas/already-have-a-visa/check-visa-details-and-conditions/check-conditions-online',
                 'instructions': 'Visa Entitlement Verification Online (VEVO) by Australian Department of Home Affairs.',
             },
+                        {
+                'country_or_provider': 'Turkey',
+                'required_fields': [
+                    {'name': 'order_id', 'label': 'Order/Application ID'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.evisa.gov.tr/',
+                'instructions': 'Official Turkish e-Visa system; status check at evisa.gov.tr/en/status/.',
+            },
+            {
+                'country_or_provider': 'India',
+                'required_fields': [
+                    {'name': 'application_id', 'label': 'Application ID'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://indianvisaonline.gov.in/evisa/',
+                'instructions': 'Official Indian e-Visa portal (Ministry of Home Affairs).',
+            },
+            {
+                'country_or_provider': 'Thailand',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://thaievisa.go.th/',
+                'instructions': 'Royal Thai e-Visa portal.',
+            },
+            {
+                'country_or_provider': 'Sri Lanka',
+                'required_fields': [
+                    {'name': 'eta_reference_number', 'label': 'ETA Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://eta.gov.lk/',
+                'instructions': 'Electronic Travel Authorization (ETA) — Department of Immigration & Emigration.',
+            },
+            {
+                'country_or_provider': 'Indonesia',
+                'required_fields': [
+                    {'name': 'reference_number', 'label': 'Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://evisa.imigrasi.go.id/',
+                'instructions': 'Directorate General of Immigration e-Visa portal.',
+            },
+            {
+                'country_or_provider': 'Maldives',
+                'required_fields': [
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://imuga.immigration.gov.mv/traveller',
+                'instructions': 'IMUGA Traveller Declaration — mandatory pre-arrival system, free of charge.',
+            },
+
+
+
+
+
+
+
+            
         ]
 
         created_count = 0
