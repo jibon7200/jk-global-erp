@@ -401,6 +401,61 @@ class Command(BaseCommand):
                 'official_url': 'https://www.biman-airlines.com/',
                 'instructions': 'Use "Manage My Booking" with PNR and last name.',
             },
+                        {
+                'country_or_provider': 'US-Bangla Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://usbair.com/manage-your-booking',
+                'instructions': 'Only works for tickets bought directly via US-Bangla website/app/sales office, not third-party agencies.',
+            },
+            {
+                'country_or_provider': 'NOVOAIR',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.flynovoair.com/',
+                'instructions': 'Domestic Bangladesh airline — use the Manage Booking / Check-in section.',
+            },
+            {
+                'country_or_provider': 'Emirates',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.emirates.com/english/manage-booking/',
+                'instructions': 'Official Emirates Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Qatar Airways',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.qatarairways.com/en/manage-booking.html',
+                'instructions': 'Official Qatar Airways Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Etihad Airways',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.etihad.com/en/manage',
+                'instructions': 'Official Etihad Airways Manage Booking portal.',
+            },
 
         ]
 
