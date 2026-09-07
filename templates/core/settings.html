@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card" style="max-width:480px;">
+        <h2 style="font-size:16px; color:#0f172a; margin-bottom:20px;">Company Settings</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Company Name</label>
+                {{ form.company_name }}
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Managing Director / Proprietor Name</label>
+                {{ form.managing_director_name }}
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Company Logo</label>
+                {% if site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}" style="max-height:60px; margin-bottom:10px; display:block;">
+                {% endif %}
+                {{ form.logo }}
+            </div>
+
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Currency Symbol</label>
+                {{ form.currency_symbol }}
+            </div>
+
+            <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                Save Changes
+            </button>
+        </form>
+    </div>
+
+    <style>
+        .form-input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+        .form-input:focus { outline: none; border-color: #1e3a5f; }
+    </style>
+
+{% endblock %}

@@ -71,3 +71,38 @@ class VerificationConfig(models.Model):
         verbose_name_plural = "Verification Configurations"
         ordering = ['service_type', 'country_or_provider']
         unique_together = ('country_or_provider', 'service_type')
+
+class CheckLog(models.Model):
+    """
+    Records every time a status check was actually performed —
+    i.e. when staff clicked through to an official verification
+    website, or ran a Manpower search. This lets Admin (who doesn't
+    do this work personally) see how many checks staff performed
+    today, broken down by type.
+    """
+
+    class CheckType(models.TextChoices):
+        VISA = 'VISA', 'Visa'
+        PASSPORT = 'PASSPORT', 'Passport'
+        AIR_TICKET = 'AIR_TICKET', 'Air Ticket'
+        MANPOWER = 'MANPOWER', 'Manpower'
+
+    check_type = models.CharField(max_length=20, choices=CheckType.choices)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='check_logs_created'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_check_type_display()} check by {self.created_by} at {self.created_at}"
+
+    class Meta:
+        verbose_name = "Check Log"
+        verbose_name_plural = "Check Logs"
+        ordering = ['-created_at']        

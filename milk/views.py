@@ -41,7 +41,7 @@ def product_add_view(request):
     operational task, not a sensitive one like Profit.
     """
     if request.method == 'POST':
-        form = MilkProductForm(request.POST)
+        form = MilkProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.created_by = request.user
@@ -65,7 +65,7 @@ def product_edit_view(request, pk):
     product = get_object_or_404(MilkProduct, pk=pk)
 
     if request.method == 'POST':
-        form = MilkProductForm(request.POST, instance=product)
+        form = MilkProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, f'Product "{product.name}" updated successfully.')

@@ -1,10 +1,13 @@
 from datetime import timedelta, date
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
 from django.utils import timezone
+from .models import SiteSettings
+
 
 from milk.models import MilkPurchase, MilkSale
 from travel.models import AirTicket, Visa, Passport, Manpower
@@ -12,25 +15,56 @@ from expenses.models import Expense
 
 from .models import SiteSettings
 from .decorators import admin_required
+from .forms import SiteSettingsForm
 
 
 @login_required
 def dashboard_view(request):
     """
-    Main dashboard shown right after login.
-    Currently a simple placeholder — full dashboard cards
-    (Milk stock, Today's sales, Ticket/Visa/Passport counts,
-    Expenses) will be added in a later phase.
-
-    IMPORTANT: Profit is NEVER shown here, even for Admin.
-    Profit only appears on its own protected page.
+    Main dashboard — shows today's operational snapshot across
+    Milk Business, Travel Agency, and Expenses. Profit is NEVER
+    shown here, even for Admin — it only exists on the dedicated
+    Profit page.
     """
-    site_settings = SiteSettings.get_settings()
+    from milk.models import MilkProduct, MilkPurchase, MilkSale
+    from travel.models import AirTicket, Visa, Passport, Manpower
+    from expenses.models import Expense
+    from django.db.models import Sum
+
+    today = timezone.localdate()
+
+    # Milk Business snapshot
+    total_products = MilkProduct.objects.filter(is_active=True).count()
+    today_purchase_bags = MilkPurchase.objects.filter(date=today).aggregate(total=Sum('quantity_bags'))['total'] or 0
+    today_sale_bags = MilkSale.objects.filter(date=today).aggregate(total=Sum('quantity_bags'))['total'] or 0
+
+    all_purchased = MilkPurchase.objects.aggregate(total=Sum('quantity_bags'))['total'] or 0
+    all_sold = MilkSale.objects.aggregate(total=Sum('quantity_bags'))['total'] or 0
+    total_current_stock = all_purchased - all_sold
+
+    # Travel Agency snapshot
+    today_tickets = AirTicket.objects.filter(date=today).count()
+    today_visa = Visa.objects.filter(date=today).count()
+    today_passport = Passport.objects.filter(date=today).count()
+    today_manpower = Manpower.objects.filter(date=today).count()
+
+    # Expenses snapshot
+    today_expense_total = Expense.objects.filter(date=today).aggregate(total=Sum('amount'))['total'] or 0
 
     context = {
-        'site_settings': site_settings,
+        'site_settings': SiteSettings.get_settings(),
         'is_admin': request.user.is_admin_role(),
         'active_menu': 'dashboard',
+        'today': today,
+        'total_products': total_products,
+        'today_purchase_bags': today_purchase_bags,
+        'today_sale_bags': today_sale_bags,
+        'total_current_stock': total_current_stock,
+        'today_tickets': today_tickets,
+        'today_visa': today_visa,
+        'today_passport': today_passport,
+        'today_manpower': today_manpower,
+        'today_expense_total': today_expense_total,
     }
     return render(request, 'core/dashboard.html', context)
 def _resolve_date_range(request):
@@ -176,3 +210,29 @@ def profit_view(request):
         'total_business_profit': total_business_profit,
     }
     return render(request, 'core/profit.html', context)
+
+@login_required
+@admin_required
+def settings_view(request):
+    """
+    Lets Admin customize company name, MD name, logo, and currency
+    directly from the website — no need to use /admin/ anymore.
+    """
+    site_settings = SiteSettings.get_settings()
+
+    if request.method == 'POST':
+        form = SiteSettingsForm(request.POST, request.FILES, instance=site_settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Settings updated successfully.')
+            return redirect('core:settings')
+    else:
+        form = SiteSettingsForm(instance=site_settings)
+
+    context = {
+        'site_settings': site_settings,
+        'is_admin': True,
+        'active_menu': 'settings',
+        'form': form,
+    }
+    return render(request, 'core/settings.html', context)

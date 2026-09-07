@@ -45,7 +45,7 @@
                 </a>
 
                 <a href="{% url 'dues:customer_list' %}" class="nav-item {% if active_menu == 'dues' %}active{% endif %}">
-                    <span class="icon">🧾</span> বাকি (Due)
+                    <span class="icon">🧾</span> Due
                 </a>
 
                 {% if is_admin %}
@@ -71,14 +71,16 @@
                 </a>
 
                 {% if is_admin %}
-                <a href="#" class="nav-item {% if active_menu == 'users' %}active{% endif %}">
+                <a href="{% url 'accounts:user_list' %}" class="nav-item {% if active_menu == 'users' %}active{% endif %}">
                     <span class="icon">👥</span> Users
                 </a>
                 {% endif %}
 
-                <a href="#" class="nav-item {% if active_menu == 'settings' %}active{% endif %}">
+                {% if is_admin %}
+                <a href="{% url 'core:settings' %}" class="nav-item {% if active_menu == 'settings' %}active{% endif %}">
                     <span class="icon">⚙️</span> Settings
                 </a>
+                {% endif %}
             </nav>
 
             <div class="sidebar-footer">
@@ -96,6 +98,7 @@
                     <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
                 </div>
                 <div class="user-info">
+                    <button id="themeToggleBtn" title="Toggle dark/light mode" style="background:#f1f5f9; border:none; width:34px; height:34px; border-radius:8px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">🌙</button>
                     <span>{{ request.user.username }}</span>
                     {% if is_admin %}
                         <span class="role-badge role-admin">ADMIN</span>
@@ -126,6 +129,26 @@
         overlay.addEventListener('click', function () {
             sidebar.classList.remove('open');
             overlay.classList.remove('show');
+        });
+
+        // Dark/Light mode toggle
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const currentTheme = localStorage.getItem('jk_theme') || 'light';
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggleBtn.textContent = '☀️';
+        }
+        themeToggleBtn.addEventListener('click', function () {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('jk_theme', 'light');
+                themeToggleBtn.textContent = '🌙';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('jk_theme', 'dark');
+                themeToggleBtn.textContent = '☀️';
+            }
         });
     </script>
 

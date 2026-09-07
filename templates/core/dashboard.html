@@ -4,18 +4,54 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-    <div class="card">
-        <h1 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">
-            Welcome, {{ request.user.username }} 👋
-        </h1>
-        <p style="font-size: 14px; color: #64748b; line-height: 1.6;">
-            This is your JK GLOBAL dashboard. In the next phases, this page will
-            show Milk Business stock, today's purchase/sale, ticket/visa/passport/manpower
-            counts, and today's expense summary.
-        </p>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 10px;">
-            Note: Profit is never shown on this dashboard — it only appears
-            on the dedicated Profit page, which is Admin-only.
-        </p>
+
+    <div style="font-size:13px; color:#64748b; margin-bottom:18px;">
+        Welcome back, {{ request.user.username }} — here's today's snapshot ({{ today|date:"d M Y" }})
     </div>
+
+    <!-- Milk Business -->
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">🥛 Milk Business</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:26px;">
+        <a href="{% url 'milk:stock' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">CURRENT STOCK</div>
+            <div style="font-size:26px; font-weight:800; color:#0f172a; margin-top:6px;">{{ total_current_stock }} <span style="font-size:13px; font-weight:600; color:#94a3b8;">bags</span></div>
+        </a>
+        <a href="{% url 'milk:purchase_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S PURCHASE</div>
+            <div style="font-size:26px; font-weight:800; color:#1d4ed8; margin-top:6px;">{{ today_purchase_bags }} <span style="font-size:13px; font-weight:600; color:#94a3b8;">bags</span></div>
+        </a>
+        <a href="{% url 'milk:sale_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S SALE</div>
+            <div style="font-size:26px; font-weight:800; color:#15803d; margin-top:6px;">{{ today_sale_bags }} <span style="font-size:13px; font-weight:600; color:#94a3b8;">bags</span></div>
+        </a>
+    </div>
+
+    <!-- Travel Agency -->
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">✈️ Travel Agency</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:26px;">
+        <a href="{% url 'travel:ticket_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S TICKETS</div>
+            <div style="font-size:24px; font-weight:800; color:#0f172a; margin-top:6px;">{{ today_tickets }}</div>
+        </a>
+        <a href="{% url 'travel:visa_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S VISA</div>
+            <div style="font-size:24px; font-weight:800; color:#0f172a; margin-top:6px;">{{ today_visa }}</div>
+        </a>
+        <a href="{% url 'travel:passport_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S PASSPORTS</div>
+            <div style="font-size:24px; font-weight:800; color:#0f172a; margin-top:6px;">{{ today_passport }}</div>
+        </a>
+        <a href="{% url 'travel:manpower_list' %}" class="card" style="text-decoration:none; display:block;">
+            <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S MANPOWER</div>
+            <div style="font-size:24px; font-weight:800; color:#0f172a; margin-top:6px;">{{ today_manpower }}</div>
+        </a>
+    </div>
+
+    <!-- Expenses -->
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">💳 Expenses</div>
+    <a href="{% url 'expenses:expense_list' %}" class="card" style="text-decoration:none; display:block; max-width:260px;">
+        <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S EXPENSE TOTAL</div>
+        <div style="font-size:26px; font-weight:800; color:#b91c1c; margin-top:6px;">৳{{ today_expense_total|floatformat:2 }}</div>
+    </a>
+
 {% endblock %}

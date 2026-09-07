@@ -43,7 +43,16 @@
                 <tbody>
                     {% for product in products %}
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ product.name }}</td>
+                        <td style="padding:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+                                {% else %}
+                                    <div style="width:40px; height:40px; background:#f1f5f9; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:16px;">🥛</div>
+                                {% endif %}
+                                <span style="font-size:14px; color:#0f172a; font-weight:500;">{{ product.name }}</span>
+                            </div>
+                        </td>
                         <td style="padding:10px;">
                             {% if product.is_active %}
                                 <span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Active</span>

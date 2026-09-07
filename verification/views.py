@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from core.models import SiteSettings
 from travel.models import Manpower
-from .models import VerificationConfig
+from .models import VerificationConfig, CheckLog
 
 
 def _base_context(request, active_menu):
@@ -16,10 +17,23 @@ def _base_context(request, active_menu):
 @login_required
 def status_home_view(request):
     """
-    The main Status Checking hub — four cards linking to each
-    checking tool.
+    Status Checking hub — also shows today's check counts per type,
+    so Admin can see how much verification work staff has done today
+    without having to ask.
     """
+    today = timezone.localdate()
+    today_logs = CheckLog.objects.filter(created_at__date=today)
+
+    todays_counts = {
+        'visa': today_logs.filter(check_type=CheckLog.CheckType.VISA).count(),
+        'passport': today_logs.filter(check_type=CheckLog.CheckType.PASSPORT).count(),
+        'air_ticket': today_logs.filter(check_type=CheckLog.CheckType.AIR_TICKET).count(),
+        'manpower': today_logs.filter(check_type=CheckLog.CheckType.MANPOWER).count(),
+    }
+
     context = _base_context(request, 'status')
+    context['todays_counts'] = todays_counts
+    context['todays_total'] = sum(todays_counts.values())
     return render(request, 'verification/status_home.html', context)
 
 
@@ -76,15 +90,27 @@ def visa_check_view(request):
 
 @login_required
 def passport_check_view(request):
-    return _handle_country_based_check(request, VerificationConfig.ServiceType.PASSPORT, 'verification/passport_check.html')
+    """
+    Bangladesh e-Passport application status checking ONLY —
+    this tool answers 'is my new passport ready yet / how much
+    longer will it take', using the applicant's Online Registration
+    ID (OID) or Application ID plus Date of Birth, on the official
+    epassport.gov.bd site. This is NOT for foreign passport
+    verification (that would need each country's own system).
+    """
+    show_result_prompt = request.method == 'POST'
+
+    if show_result_prompt:
+        CheckLog.objects.create(check_type=CheckLog.CheckType.PASSPORT, created_by=request.user)
+
+    context = _base_context(request, 'status')
+    context['show_result_prompt'] = show_result_prompt
+    context['official_url'] = 'https://www.epassport.gov.bd/authorization/application-status'
+    return render(request, 'verification/passport_check.html', context)
 
 
 @login_required
 def air_ticket_check_view(request):
-    """
-    Air Ticket checking works the same way as Visa/Passport, but
-    the "country" field is repurposed as Airline/Provider name.
-    """
     return _handle_country_based_check(
         request, VerificationConfig.ServiceType.AIR_TICKET, 'verification/air_ticket_check.html'
     )
@@ -92,21 +118,39 @@ def air_ticket_check_view(request):
 
 @login_required
 def manpower_check_view(request):
-    """
-    Manpower Checking is DIFFERENT from the other three — it
-    searches JK GLOBAL's OWN database of Manpower records, so it
-    can give a real, honest result (not a placeholder), as allowed
-    by the project spec (checking internal records first).
-    Profit/cost is intentionally never shown here, even to Admin —
-    this is a status lookup tool, not a financial report.
-    """
     passport_number = request.GET.get('passport_number', '').strip()
     matches = None
 
     if passport_number:
         matches = Manpower.objects.filter(passport_number__iexact=passport_number)
+        # Log this as a real check performed.
+        CheckLog.objects.create(check_type=CheckLog.CheckType.MANPOWER, created_by=request.user)
 
     context = _base_context(request, 'status')
     context['passport_number'] = passport_number
     context['matches'] = matches
     return render(request, 'verification/manpower_check.html', context)
+
+
+@login_required
+def track_click_view(request, service_type, pk):
+    """
+    Logs a check event, then redirects the user on to the official
+    verification website. This is the ONLY way the 'OPEN OFFICIAL
+    VERIFICATION WEBSITE' button works now — clicking it always
+    counts as one check for that category before sending the user
+    onward.
+    """
+    config = get_object_or_404(VerificationConfig, pk=pk)
+
+    type_map = {
+        'visa': CheckLog.CheckType.VISA,
+        'passport': CheckLog.CheckType.PASSPORT,
+        'air_ticket': CheckLog.CheckType.AIR_TICKET,
+    }
+    check_type = type_map.get(service_type)
+
+    if check_type:
+        CheckLog.objects.create(check_type=check_type, created_by=request.user)
+
+    return redirect(config.official_url)

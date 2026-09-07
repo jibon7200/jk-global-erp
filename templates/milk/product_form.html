@@ -6,7 +6,7 @@
 {% block content %}
 
     <div class="card" style="max-width: 480px;">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div style="margin-bottom: 18px;">
@@ -18,6 +18,22 @@
                     <div style="color:#b91c1c; font-size:12px; margin-top:4px;">{{ form.name.errors.0 }}</div>
                 {% endif %}
             </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">
+                    Product Photo (optional)
+                </label>
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; margin-bottom:8px; display:block;">
+                {% endif %}
+                {{ form.image }}
+            </div>
+
+            <div style="margin-bottom: 22px; display:flex; align-items:center; gap:8px;">
+                {{ form.is_active }}
+                <label style="font-size:13px; color:#334155;">Active (visible in Purchase/Sale forms)</label>
+            </div>
+
 
             <div style="margin-bottom: 22px; display:flex; align-items:center; gap:8px;">
                 {{ form.is_active }}

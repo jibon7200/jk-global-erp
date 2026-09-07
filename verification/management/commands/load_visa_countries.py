@@ -213,24 +213,208 @@ class Command(BaseCommand):
                 'official_url': 'https://www.immd.gov.hk/eng/e-visa.html',
                 'instructions': 'Hong Kong Immigration Department (ImmD) e-Visa arrangement.',
             },
+                        {
+                'country_or_provider': 'Philippines',
+                'required_fields': [
+                    {'name': 'control_number', 'label': 'eVisa Control Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://evisa.gov.ph/',
+                'instructions': 'Department of Foreign Affairs (DFA) eVisa Verifier.',
+            },
+            {
+                'country_or_provider': 'New Zealand',
+                'required_fields': [
+                    {'name': 'application_number', 'label': 'Application Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.immigration.govt.nz/',
+                'instructions': 'Immigration New Zealand (INZ) — requires an Immigration Online account.',
+            },
+            {
+                'country_or_provider': 'Italy (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/ita/',
+                'instructions': 'VFS Global Dhaka — official outsourced visa application/tracking partner for the Italian Embassy.',
+            },
+            {
+                'country_or_provider': 'Germany (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/deu/',
+                'instructions': 'VFS Global Dhaka — official outsourced visa application/tracking partner for the German Embassy.',
+            },
+            {
+                'country_or_provider': 'France (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/fra/',
+                'instructions': 'VFS Global Dhaka — official outsourced visa application/tracking partner for the French Embassy.',
+            },
+                        {
+                'country_or_provider': 'Sweden (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/swe/',
+                'instructions': 'VFS Global Dhaka — Embassy of Sweden also represents Netherlands, Belgium, and Finland for Schengen visas from Bangladesh.',
+            },
+            {
+                'country_or_provider': 'Denmark (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/dnk/',
+                'instructions': 'VFS Global Dhaka — official outsourced partner for the Danish Embassy.',
+            },
+            {
+                'country_or_provider': 'Austria (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/aut/',
+                'instructions': 'VFS Global Dhaka — official outsourced partner for the Austrian Embassy.',
+            },
+            {
+                'country_or_provider': 'Netherlands (via Sweden Embassy)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/swe/',
+                'instructions': 'No separate Dhaka centre — visas processed via Embassy of Sweden representation agreement.',
+            },
+            {
+                'country_or_provider': 'Belgium (via Sweden Embassy)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/swe/',
+                'instructions': 'No separate Dhaka centre — visas processed via Embassy of Sweden representation agreement.',
+            },
+            {
+                'country_or_provider': 'Finland (via Sweden Embassy)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/swe/',
+                'instructions': 'No separate Dhaka centre — visas processed via Embassy of Sweden representation agreement.',
+            },
+                        {
+                'country_or_provider': 'Croatia (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/hrv/',
+                'instructions': 'VFS Global Dhaka — official outsourced partner for the Croatian Embassy.',
+            },
+            {
+                'country_or_provider': 'Hungary (Schengen)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/hun/',
+                'instructions': 'VFS Global Dhaka — official outsourced partner for the Hungarian Embassy.',
+            },
+            {
+                'country_or_provider': 'Poland (via Sweden Embassy)',
+                'required_fields': [
+                    {'name': 'application_reference_number', 'label': 'Application Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://visa.vfsglobal.com/bgd/en/swe/',
+                'instructions': 'No separate Dhaka centre — visas processed via Embassy of Sweden representation agreement.',
+            },
+                        {
+                'country_or_provider': 'Russia',
+                'required_fields': [
+                    {'name': 'application_id', 'label': 'Application ID'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://evisacheck.kdmid.ru/',
+                'instructions': 'Consular Department, Ministry of Foreign Affairs of Russia — dedicated e-visa status checker.',
+            },
+            {
+                'country_or_provider': 'Uzbekistan',
+                'required_fields': [
+                    {'name': 'application_number', 'label': 'Application Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://e-visa.gov.uz/',
+                'instructions': 'Official Uzbekistan e-Visa portal.',
+            },
+            {
+                'country_or_provider': 'Kazakhstan',
+                'required_fields': [
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                    {'name': 'passport_expiry_date', 'label': 'Passport Expiry Date'},
+                ],
+                'official_url': 'https://www.vmp.gov.kz/',
+                'instructions': 'Visa-Migration Portal of the Republic of Kazakhstan.',
+            },
+            {
+                'country_or_provider': 'South Africa',
+                'required_fields': [
+                    {'name': 'reference_number', 'label': 'Reference Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://ehome.dha.gov.za/epermit/login',
+                'instructions': 'Department of Home Affairs (DHA) ePermit portal.',
+            },
+            {
+                'country_or_provider': 'Kenya',
+                'required_fields': [
+                    {'name': 'eta_application_number', 'label': 'eTA Application Number'},
+                    {'name': 'passport_number', 'label': 'Passport Number'},
+                ],
+                'official_url': 'https://www.etakenya.go.ke/',
+                'instructions': 'Electronic Travel Authorization (eTA) official portal.',
+            },
 
 
 
 
 
 
-
+            {
+                'country_or_provider': 'Biman Bangladesh Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.biman-airlines.com/',
+                'instructions': 'Use "Manage My Booking" with PNR and last name.',
+            },
 
         ]
 
         created_count = 0
         for entry in countries:
+            service_type = entry.get('service_type', VerificationConfig.ServiceType.VISA)
+            method = entry.get('method', VerificationConfig.Method.WEBSITE)
+
             obj, created = VerificationConfig.objects.get_or_create(
                 country_or_provider=entry['country_or_provider'],
-                service_type=VerificationConfig.ServiceType.VISA,
+                service_type=service_type,
                 defaults={
                     'required_fields': entry['required_fields'],
-                    'method': VerificationConfig.Method.WEBSITE,
+                    'method': method,
                     'official_url': entry['official_url'],
                     'instructions': entry['instructions'],
                 }

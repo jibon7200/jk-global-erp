@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit User{% else %}Add User{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}Edit User{% else %}Add New User{% endif %}{% endblock %}
+
+{% block content %}
+
+    <div class="card" style="max-width:460px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Username</label>
+                {{ form.username }}
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Email</label>
+                {{ form.email }}
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Phone Number</label>
+                {{ form.phone_number }}
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Role</label>
+                {{ form.role }}
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Password {% if is_edit %}(leave blank to keep unchanged){% endif %}</label>
+                {{ form.password }}
+            </div>
+
+            <div style="margin-bottom:22px; display:flex; align-items:center; gap:8px;">
+                {{ form.is_active }}
+                <label style="font-size:13px; color:#334155;">Active</label>
+            </div>
+
+            <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+                {% if is_edit %}Save Changes{% else %}Create User{% endif %}
+            </button>
+        </form>
+    </div>
+
+    <style>
+        .form-input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+    </style>
+
+{% endblock %}

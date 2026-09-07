@@ -10,7 +10,7 @@ class MilkProductForm(forms.ModelForm):
 
     class Meta:
         model = MilkProduct
-        fields = ['name', 'is_active']
+        fields = ['name', 'is_active', 'image']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-input',
@@ -18,6 +18,10 @@ class MilkProductForm(forms.ModelForm):
             }),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-checkbox'
+            }),
+            'image': forms.ClearableFileInput(attrs={
+                'class': 'form-input',
+                'accept': 'image/*'
             }),
         }
 class MilkPurchaseForm(forms.ModelForm):

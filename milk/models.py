@@ -24,6 +24,13 @@ class MilkProduct(models.Model):
         help_text="Inactive products are hidden from purchase/sale forms but kept for history."
     )
 
+    image = models.ImageField(
+        upload_to='milk_products/',
+        blank=True,
+        null=True,
+        help_text="Optional product photo."
+    )
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
