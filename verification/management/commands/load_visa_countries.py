@@ -456,6 +456,160 @@ class Command(BaseCommand):
                 'official_url': 'https://www.etihad.com/en/manage',
                 'instructions': 'Official Etihad Airways Manage Booking portal.',
             },
+                        {
+                'country_or_provider': 'Malaysia Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.malaysiaairlines.com/',
+                'instructions': 'Use the "Manage My Booking" section.',
+            },
+            {
+                'country_or_provider': 'Singapore Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.singaporeair.com/en_UK/us/plan-travel/yourbooking/',
+                'instructions': 'Official "Your Booking" management portal.',
+            },
+            {
+                'country_or_provider': 'Thai Airways',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.thaiairways.com/managebooking/detail/',
+                'instructions': 'Official Thai Airways Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Air India',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.airindia.com/in/en/manage/booking.html',
+                'instructions': 'Official Air India Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'IndiGo',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.goindigo.in/',
+                'instructions': 'Official IndiGo website — use "Manage Booking" from the homepage.',
+            },
+            {
+                'country_or_provider': 'SriLankan Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.srilankan.com/',
+                'instructions': 'Official SriLankan Airlines website.',
+            },
+            {
+                'country_or_provider': 'Cathay Pacific',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.cathaypacific.com/mb/',
+                'instructions': 'Official Cathay Pacific Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Turkish Airlines',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.turkishairlines.com/en-int/flights/manage-booking',
+                'instructions': 'Official Turkish Airlines Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Saudia (Saudi Arabian Airlines)',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.saudia.com/en/manage-booking',
+                'instructions': 'Official Saudia Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Air Arabia',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.airarabia.com/en/manage-bookings',
+                'instructions': 'Official Air Arabia Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'flydubai',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'pnr', 'label': 'PNR / Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.flydubai.com/en/book-and-manage/view-or-change-booking',
+                'instructions': 'Official flydubai Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Gulf Air',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.gulfair.com/flying-with-us/before-you-travel/manage',
+                'instructions': 'Official Gulf Air Manage Booking portal.',
+            },
+            {
+                'country_or_provider': 'Oman Air',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference / E-ticket Number'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.omanair.com/',
+                'instructions': 'Official Oman Air website — use "Manage Booking" from the homepage.',
+            },
+            {
+                'country_or_provider': 'British Airways',
+                'service_type': VerificationConfig.ServiceType.AIR_TICKET,
+                'required_fields': [
+                    {'name': 'booking_reference', 'label': 'Booking Reference'},
+                    {'name': 'last_name', 'label': 'Passenger Last Name'},
+                ],
+                'method': VerificationConfig.Method.WEBSITE,
+                'official_url': 'https://www.britishairways.com/',
+                'instructions': 'Official British Airways website — use "Manage My Booking".',
+            },
         
 
 
