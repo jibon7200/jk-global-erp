@@ -118,17 +118,24 @@ def air_ticket_check_view(request):
 
 @login_required
 def manpower_check_view(request):
+    """
+    First checks JK GLOBAL's own database (this is the primary,
+    real capability). If nothing matches internally, this ALSO
+    offers the official Bangladesh government BMET Smart Card
+    verification portal as a fallback — a real, verified government
+    system for checking manpower/emigration clearance status.
+    """
     passport_number = request.GET.get('passport_number', '').strip()
     matches = None
 
     if passport_number:
         matches = Manpower.objects.filter(passport_number__iexact=passport_number)
-        # Log this as a real check performed.
         CheckLog.objects.create(check_type=CheckLog.CheckType.MANPOWER, created_by=request.user)
 
     context = _base_context(request, 'status')
     context['passport_number'] = passport_number
     context['matches'] = matches
+    context['bmet_url'] = 'https://oc.bmet.gov.bd/'
     return render(request, 'verification/manpower_check.html', context)
 
 
@@ -154,3 +161,14 @@ def track_click_view(request, service_type, pk):
         CheckLog.objects.create(check_type=check_type, created_by=request.user)
 
     return redirect(config.official_url)
+
+
+@login_required
+def track_bmet_click_view(request):
+    """
+    Logs a Manpower check when the user clicks through to the
+    official BMET government portal (used when no internal record
+    was found), then redirects them there.
+    """
+    CheckLog.objects.create(check_type=CheckLog.CheckType.MANPOWER, created_by=request.user)
+    return redirect('https://oc.bmet.gov.bd/')

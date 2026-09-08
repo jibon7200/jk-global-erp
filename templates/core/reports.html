@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+
+    <div style="display:flex; gap:8px; margin-bottom:22px;">
+        <a href="?filter=today" style="background:{% if label == 'Today' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if label == 'Today' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Today</a>
+        <a href="?filter=this_month" style="background:{% if label == 'This Month' %}#1e3a5f{% else %}#e2e8f0{% endif %}; color:{% if label == 'This Month' %}#fff{% else %}#334155{% endif %}; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">This Month</a>
+    </div>
+
+    <div style="font-size:13px; color:#64748b; margin-bottom:18px;">
+        Showing: <strong>{{ label }}</strong> ({{ start_date|date:"d M Y" }} — {{ end_date|date:"d M Y" }})
+    </div>
+
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">🥛 Milk Business</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:26px;">
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">PURCHASED</div><div style="font-size:24px; font-weight:800; color:#1d4ed8; margin-top:6px;">{{ milk_purchased }} bags</div></div>
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">SOLD</div><div style="font-size:24px; font-weight:800; color:#15803d; margin-top:6px;">{{ milk_sold }} bags</div></div>
+    </div>
+
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">✈️ Travel Agency</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:26px;">
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">TICKETS</div><div style="font-size:22px; font-weight:800; color:#0f172a; margin-top:6px;">{{ tickets_count }}</div></div>
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">VISA</div><div style="font-size:22px; font-weight:800; color:#0f172a; margin-top:6px;">{{ visa_count }}</div></div>
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">PASSPORTS</div><div style="font-size:22px; font-weight:800; color:#0f172a; margin-top:6px;">{{ passport_count }}</div></div>
+        <div class="card"><div style="font-size:11px; color:#64748b; font-weight:600;">MANPOWER</div><div style="font-size:22px; font-weight:800; color:#0f172a; margin-top:6px;">{{ manpower_count }}</div></div>
+    </div>
+
+    <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px;">💳 Expenses</div>
+    <div class="card" style="max-width:260px;">
+        <div style="font-size:11px; color:#64748b; font-weight:600;">TOTAL EXPENSE</div>
+        <div style="font-size:24px; font-weight:800; color:#b91c1c; margin-top:6px;">৳{{ expense_total|floatformat:2 }}</div>
+    </div>
+
+{% endblock %}

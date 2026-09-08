@@ -71,7 +71,7 @@
                 </a>
                 {% endif %}
 
-                <a href="#" class="nav-item {% if active_menu == 'reports' %}active{% endif %}">
+                <a href="{% url 'core:reports' %}" class="nav-item {% if active_menu == 'reports' %}active{% endif %}">
                     <span class="icon">📊</span> Reports
                 </a>
 

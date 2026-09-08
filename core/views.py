@@ -263,3 +263,51 @@ def theme_view(request):
     }
     return render(request, 'core/theme.html', context)
 
+
+@login_required
+def reports_view(request):
+    """
+    Daily/Monthly operational report — Milk purchased/sold, Tickets,
+    Visa, Passports, Manpower, Expenses. NEVER shows Profit — that
+    stays exclusively on the Admin-only Profit page.
+    """
+    from milk.models import MilkPurchase, MilkSale
+    from travel.models import AirTicket, Visa, Passport, Manpower
+    from expenses.models import Expense
+    from django.db.models import Sum
+
+    filter_type = request.GET.get('filter', 'today')
+    today = timezone.localdate()
+
+    if filter_type == 'today':
+        start_date, end_date, label = today, today, 'Today'
+    elif filter_type == 'this_month':
+        start_date, end_date, label = today.replace(day=1), today, 'This Month'
+    else:
+        start_date, end_date, label = today, today, 'Today'
+
+    milk_purchased = MilkPurchase.objects.filter(date__range=[start_date, end_date]).aggregate(total=Sum('quantity_bags'))['total'] or 0
+    milk_sold = MilkSale.objects.filter(date__range=[start_date, end_date]).aggregate(total=Sum('quantity_bags'))['total'] or 0
+    tickets_count = AirTicket.objects.filter(date__range=[start_date, end_date]).count()
+    visa_count = Visa.objects.filter(date__range=[start_date, end_date]).count()
+    passport_count = Passport.objects.filter(date__range=[start_date, end_date]).count()
+    manpower_count = Manpower.objects.filter(date__range=[start_date, end_date]).count()
+    expense_total = Expense.objects.filter(date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'site_settings': SiteSettings.get_settings(),
+        'is_admin': request.user.is_admin_role(),
+        'active_menu': 'reports',
+        'label': label,
+        'start_date': start_date,
+        'end_date': end_date,
+        'milk_purchased': milk_purchased,
+        'milk_sold': milk_sold,
+        'tickets_count': tickets_count,
+        'visa_count': visa_count,
+        'passport_count': passport_count,
+        'manpower_count': manpower_count,
+        'expense_total': expense_total,
+    }
+    return render(request, 'core/reports.html', context)
+
