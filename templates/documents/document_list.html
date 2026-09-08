@@ -41,7 +41,7 @@
                             <a href="{% url 'documents:document_edit' doc.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">Open</a>
                             <form method="post" action="{% url 'documents:document_delete' doc.pk %}" onsubmit="return confirm('Delete this document permanently? This cannot be undone.');" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" style="background:none; border:none; color:#b91c1c; font-size:13px; font-weight:600; cursor:pointer; padding:0;">Delete</button>
+                                <button type="submit" style="background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; font-size:12px; font-weight:700; cursor:pointer; padding:6px 12px; border-radius:6px;">🗑 Delete</button>
                             </form>
                         </td>
                     </tr>

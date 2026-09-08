@@ -16,11 +16,6 @@ def _base_context(request, active_menu):
 
 @login_required
 def status_home_view(request):
-    """
-    Status Checking hub — also shows today's check counts per type,
-    so Admin can see how much verification work staff has done today
-    without having to ask.
-    """
     today = timezone.localdate()
     today_logs = CheckLog.objects.filter(created_at__date=today)
 
@@ -42,6 +37,8 @@ def _handle_country_based_check(request, service_type, template_name):
     selected_config = None
     result = None
     display_fields = []
+    url1_valid = False
+    url2_valid = False
 
     country_id = request.GET.get('country') or request.POST.get('country')
     if country_id:
@@ -54,32 +51,22 @@ def _handle_country_based_check(request, service_type, template_name):
                 'label': field['label'],
                 'value': request.POST.get(field['name'], ''),
             })
+        url1_valid = selected_config.official_url_1.startswith('http')
+        url2_valid = selected_config.official_url_2.startswith('http')
 
     if request.method == 'POST' and selected_config:
-        if selected_config.method == VerificationConfig.Method.WEBSITE:
-            result = {
-                'status': 'Manual Verification Required',
-                'message': 'No official API is integrated for this country. Please use the official website below to verify manually.',
-                'show_website_button': True,
-            }
-        elif selected_config.method == VerificationConfig.Method.API:
-            result = {
-                'status': 'Unable to Verify',
-                'message': 'An official API is planned for this country but is not yet connected. Please verify manually via the official website.',
-                'show_website_button': bool(selected_config.official_url),
-            }
-        else:
-            result = {
-                'status': 'Manual Verification Required',
-                'message': 'This country requires manual verification. Please use the official website or contact the relevant authority.',
-                'show_website_button': bool(selected_config.official_url),
-            }
+        result = {
+            'status': 'Manual Verification Required',
+            'message': 'This system does not have official government/airline API access yet. Use the official website(s) below to verify manually.',
+        }
 
     context = _base_context(request, 'status')
     context['configs'] = configs
     context['selected_config'] = selected_config
     context['display_fields'] = display_fields
     context['result'] = result
+    context['url1_valid'] = url1_valid
+    context['url2_valid'] = url2_valid
     return render(request, template_name, context)
 
 
@@ -90,16 +77,7 @@ def visa_check_view(request):
 
 @login_required
 def passport_check_view(request):
-    """
-    Bangladesh e-Passport application status checking ONLY —
-    this tool answers 'is my new passport ready yet / how much
-    longer will it take', using the applicant's Online Registration
-    ID (OID) or Application ID plus Date of Birth, on the official
-    epassport.gov.bd site. This is NOT for foreign passport
-    verification (that would need each country's own system).
-    """
     show_result_prompt = request.method == 'POST'
-
     if show_result_prompt:
         CheckLog.objects.create(check_type=CheckLog.CheckType.PASSPORT, created_by=request.user)
 
@@ -118,13 +96,6 @@ def air_ticket_check_view(request):
 
 @login_required
 def manpower_check_view(request):
-    """
-    First checks JK GLOBAL's own database (this is the primary,
-    real capability). If nothing matches internally, this ALSO
-    offers the official Bangladesh government BMET Smart Card
-    verification portal as a fallback — a real, verified government
-    system for checking manpower/emigration clearance status.
-    """
     passport_number = request.GET.get('passport_number', '').strip()
     matches = None
 
@@ -140,13 +111,10 @@ def manpower_check_view(request):
 
 
 @login_required
-def track_click_view(request, service_type, pk):
+def track_click_view(request, service_type, pk, slot):
     """
-    Logs a check event, then redirects the user on to the official
-    verification website. This is the ONLY way the 'OPEN OFFICIAL
-    VERIFICATION WEBSITE' button works now — clicking it always
-    counts as one check for that category before sending the user
-    onward.
+    Logs a check event, then redirects to the chosen official
+    website slot (1 or 2) for that country/airline.
     """
     config = get_object_or_404(VerificationConfig, pk=pk)
 
@@ -156,19 +124,14 @@ def track_click_view(request, service_type, pk):
         'air_ticket': CheckLog.CheckType.AIR_TICKET,
     }
     check_type = type_map.get(service_type)
-
     if check_type:
         CheckLog.objects.create(check_type=check_type, created_by=request.user)
 
-    return redirect(config.official_url)
+    target_url = config.official_url_1 if slot == '1' else config.official_url_2
+    return redirect(target_url)
 
 
 @login_required
 def track_bmet_click_view(request):
-    """
-    Logs a Manpower check when the user clicks through to the
-    official BMET government portal (used when no internal record
-    was found), then redirects them there.
-    """
     CheckLog.objects.create(check_type=CheckLog.CheckType.MANPOWER, created_by=request.user)
     return redirect('https://oc.bmet.gov.bd/')

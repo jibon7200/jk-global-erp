@@ -88,19 +88,23 @@ body {
 }
 
 .sidebar-header .brand-text {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 800;
     color: #ffffff;
-    line-height: 1.25;
-    letter-spacing: 0.3px;
+    line-height: 1.3;
+    letter-spacing: 0.2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .sidebar-header .brand-sub {
-    font-size: 13px;
-    color: #cbd5e1;
-    margin-top: 4px;
+    font-size: 14px;
+    color: #e2e8f0;
+    margin-top: 6px;
     letter-spacing: 0.2px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .sidebar-nav {
@@ -270,4 +274,64 @@ body {
     .sidebar-overlay.show {
         display: block;
     }
+}
+
+
+/* ============================================
+   DARK MODE — force-readable text override
+   (overrides inline styles like style="color:#0f172a"
+   because a stylesheet rule with !important beats an
+   inline style that has no !important of its own)
+   ============================================ */
+[data-theme="dark"] .card,
+[data-theme="dark"] .card * {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .card {
+    background: #151f32 !important;
+    border-color: #263148 !important;
+}
+
+[data-theme="dark"] .content > div[style*="color:#64748b"],
+[data-theme="dark"] span[style*="color:#64748b"],
+[data-theme="dark"] div[style*="color:#94a3b8"] {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] table {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] th {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .topbar .user-info span {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] a {
+    color: #60a5fa !important;
+}
+
+/* Keep colored status badges/buttons readable — don't flatten these */
+[data-theme="dark"] .role-badge,
+[data-theme="dark"] span[style*="background:#dcfce7"],
+[data-theme="dark"] span[style*="background:#fee2e2"],
+[data-theme="dark"] span[style*="background:#dbeafe"],
+[data-theme="dark"] span[style*="background:#fef3c7"],
+[data-theme="dark"] a[style*="background:#1e3a5f"],
+[data-theme="dark"] a[style*="background:#15803d"],
+[data-theme="dark"] a[style*="background:#b91c1c"],
+[data-theme="dark"] button[style*="background:#1e3a5f"] {
+    color: inherit !important;
 }

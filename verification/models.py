@@ -40,9 +40,16 @@ class VerificationConfig(models.Model):
 
     method = models.CharField(max_length=10, choices=Method.choices, default=Method.MANUAL)
 
-    official_url = models.URLField(
+    official_url_1 = models.CharField(
+        max_length=500,
         blank=True,
-        help_text="Official government/airline verification website, if one exists."
+        help_text="Primary official website. Leave/edit freely — plain text placeholder allowed until you add the real link."
+    )
+
+    official_url_2 = models.CharField(
+        max_length=500,
+        blank=True,
+        help_text="Secondary official website (optional, for countries with 2 official verification portals)."
     )
 
     instructions = models.TextField(
