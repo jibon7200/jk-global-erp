@@ -456,6 +456,18 @@ class Command(BaseCommand):
                 'official_url': 'https://www.etihad.com/en/manage',
                 'instructions': 'Official Etihad Airways Manage Booking portal.',
             },
+        
+
+
+
+
+
+            
+
+
+
+
+            
 
         ]
 

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Payable{% endblock %}
+{% block page_title %}Payable — Supplier List{% endblock %}
+{% block content %}
+
+    <div style="display:flex; gap:10px; margin-bottom:18px;">
+        <a href="{% url 'payable:supplier_list' %}" style="background:#1e3a5f; color:#fff; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Suppliers</a>
+        <a href="{% url 'payable:payable_report' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Report</a>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="font-size:14px; color:#64748b;">Total Payable: <strong style="color:#b91c1c;">৳{{ total_payable|floatformat:2 }}</strong></div>
+        <a href="{% url 'payable:supplier_add' %}" style="background:#1e3a5f; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">+ Add New Supplier</a>
+    </div>
+
+    {% if messages %}{% for message in messages %}<div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>{% endfor %}{% endif %}
+
+    <div class="card">
+        {% if rows %}
+        <table style="width:100%; border-collapse: collapse;">
+            <thead><tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                <th style="padding:10px; font-size:12px; color:#64748b;">NAME</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">PHONE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">WE OWE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">ACTION</th>
+            </tr></thead>
+            <tbody>
+                {% for row in rows %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ row.supplier.name }}</td>
+                    <td style="padding:10px; font-size:13px; color:#334155;">{{ row.supplier.phone_number|default:"—" }}</td>
+                    <td style="padding:10px; font-size:14px; font-weight:700; color:{% if row.payable > 0 %}#b91c1c{% else %}#15803d{% endif %};">৳{{ row.payable|floatformat:2 }}</td>
+                    <td style="padding:10px;"><a href="{% url 'payable:supplier_detail' row.supplier.pk %}" style="color:#1e3a5f; font-size:13px; font-weight:600; text-decoration:none;">View Ledger</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">No suppliers yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

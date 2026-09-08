@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ supplier.name }}{% endblock %}
+{% block page_title %}Payable — {{ supplier.name }}{% endblock %}
+{% block content %}
+    <div class="card" style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div>
+            <div style="font-size:18px; font-weight:700; color:#0f172a;">{{ supplier.name }}</div>
+            <div style="font-size:13px; color:#64748b;">{{ supplier.phone_number|default:"No phone" }}</div>
+        </div>
+        <div style="text-align:right;">
+            <div style="font-size:12px; color:#64748b; font-weight:600;">WE OWE</div>
+            <div style="font-size:26px; font-weight:800; color:{% if current_payable > 0 %}#b91c1c{% else %}#15803d{% endif %};">৳{{ current_payable|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <a href="{% url 'payable:charge_add' supplier.pk %}" style="background:#b91c1c; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">+ Add Charge (আমরা পাওনা হলাম)</a>
+        <a href="{% url 'payable:payment_add' supplier.pk %}" style="background:#15803d; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">+ Record Payment (টাকা দিলাম)</a>
+    </div>
+
+    {% if messages %}{% for message in messages %}<div style="background:#dcfce7; color:#15803d; padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:13px;">{{ message }}</div>{% endfor %}{% endif %}
+
+    <div class="card">
+        {% if ledger %}
+        <table style="width:100%; border-collapse: collapse;">
+            <thead><tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">TYPE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">DESCRIPTION</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">AMOUNT</th>
+            </tr></thead>
+            <tbody>
+                {% for row in ledger %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:10px; font-size:13px; color:#0f172a;">{{ row.date|date:"d M Y" }}</td>
+                    <td style="padding:10px;">{% if row.type == 'Owed' %}<span style="background:#fee2e2; color:#b91c1c; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Owed</span>{% else %}<span style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;">Paid</span>{% endif %}</td>
+                    <td style="padding:10px; font-size:13px; color:#334155;">{{ row.description }}</td>
+                    <td style="padding:10px; font-size:13px; font-weight:600; color:{% if row.amount > 0 %}#b91c1c{% else %}#15803d{% endif %};">{% if row.amount > 0 %}+{% endif %}৳{{ row.amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">No transactions yet.</p>
+        {% endif %}
+    </div>
+    <div style="margin-top:16px;"><a href="{% url 'payable:supplier_list' %}" style="color:#64748b; font-size:13px; text-decoration:none;">← Back to Supplier List</a></div>
+{% endblock %}

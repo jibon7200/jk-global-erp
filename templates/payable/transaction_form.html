@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}{% if form_type == 'charge' %}Add Charge{% else %}Record Payment{% endif %}{% endblock %}
+{% block page_title %}Payable — {{ supplier.name }}{% endblock %}
+{% block content %}
+    <div class="card" style="max-width:480px;">
+        <div style="font-size:13px; color:#64748b; margin-bottom:18px;">Supplier: <strong style="color:#0f172a;">{{ supplier.name }}</strong></div>
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom:18px;"><label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Date</label>{{ form.date }}</div>
+            {% if form_type == 'charge' %}
+            <div style="margin-bottom:18px;"><label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Description</label>{{ form.description }}</div>
+            {% endif %}
+            <div style="margin-bottom:18px;"><label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Amount (৳)</label>{{ form.amount }}</div>
+            {% if form_type == 'payment' %}
+            <div style="margin-bottom:22px;"><label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Note</label>{{ form.note }}</div>
+            {% endif %}
+            <button type="submit" style="background:{% if form_type == 'charge' %}#b91c1c{% else %}#15803d{% endif %}; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">{% if form_type == 'charge' %}Save Charge{% else %}Save Payment{% endif %}</button>
+            <a href="{% url 'payable:supplier_detail' supplier.pk %}" style="background:#e2e8f0; color:#334155; padding:11px 22px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">Cancel</a>
+        </form>
+    </div>
+    <style>.form-input,input,textarea{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;}</style>
+{% endblock %}

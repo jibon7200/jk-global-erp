@@ -32,6 +32,11 @@ class SiteSettings(models.Model):
         default="৳"
     )
 
+    theme_primary_color = models.CharField(max_length=7, default="#1e3a5f", help_text="Sidebar and primary buttons.")
+    theme_accent_color = models.CharField(max_length=7, default="#3b82f6", help_text="Highlights, active menu, links.")
+    theme_text_color = models.CharField(max_length=7, default="#0f172a", help_text="Main body text color.")
+    theme_background_color = models.CharField(max_length=7, default="#f1f5f9", help_text="Page background color.")
+
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):

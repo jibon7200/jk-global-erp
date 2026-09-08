@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'documents',
     'pdf_editor',
     'verification',
+    'payable',
 ]
 
 MIDDLEWARE = [

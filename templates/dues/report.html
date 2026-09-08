@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Due Report{% endblock %}
+{% block page_title %}Due — Payment Report{% endblock %}
+{% block content %}
+    <div class="card">
+        <h3 style="font-size:15px; color:#0f172a; margin-bottom:16px;">All Payments Received — Date-wise</h3>
+        {% if payments %}
+        <table style="width:100%; border-collapse: collapse;">
+            <thead><tr style="border-bottom: 2px solid #e2e8f0; text-align:left;">
+                <th style="padding:10px; font-size:12px; color:#64748b;">DATE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">CUSTOMER</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">AMOUNT RECEIVED</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">NOTE</th>
+                <th style="padding:10px; font-size:12px; color:#64748b;">RECEIVED BY</th>
+            </tr></thead>
+            <tbody>
+                {% for p in payments %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:10px; font-size:13px; color:#0f172a;">{{ p.date|date:"d M Y" }}</td>
+                    <td style="padding:10px; font-size:14px; color:#0f172a; font-weight:500;">{{ p.customer.name }}</td>
+                    <td style="padding:10px; font-size:13px; font-weight:600; color:#15803d;">৳{{ p.amount|floatformat:2 }}</td>
+                    <td style="padding:10px; font-size:13px; color:#64748b;">{{ p.note|default:"—" }}</td>
+                    <td style="padding:10px; font-size:13px; color:#64748b;">{{ p.created_by.username|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color:#94a3b8; font-size:14px; text-align:center; padding:30px 0;">No payments recorded yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -5,6 +5,11 @@
 
 {% block content %}
 
+    <div style="display:flex; gap:10px; margin-bottom:18px;">
+        <a href="{% url 'dues:customer_list' %}" style="background:#1e3a5f; color:#fff; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Customers</a>
+        <a href="{% url 'dues:due_report' %}" style="background:#e2e8f0; color:#334155; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600;">Report</a>
+    </div>
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
         <div style="font-size:14px; color:#64748b;">
             Total Outstanding Due: <strong style="color:#b91c1c;">৳{{ total_outstanding|floatformat:2 }}</strong>

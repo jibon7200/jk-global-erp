@@ -15,7 +15,7 @@ from expenses.models import Expense
 
 from .models import SiteSettings
 from .decorators import admin_required
-from .forms import SiteSettingsForm
+from .forms import SiteSettingsForm, ThemeForm
 
 
 @login_required
@@ -236,3 +236,30 @@ def settings_view(request):
         'form': form,
     }
     return render(request, 'core/settings.html', context)
+
+@login_required
+@admin_required
+def theme_view(request):
+    """
+    Lets Admin fully customize the website's look — button/link
+    color, text color, and background color — without touching code.
+    """
+    site_settings = SiteSettings.get_settings()
+
+    if request.method == 'POST':
+        form = ThemeForm(request.POST, instance=site_settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Theme updated successfully.')
+            return redirect('core:theme')
+    else:
+        form = ThemeForm(instance=site_settings)
+
+    context = {
+        'site_settings': site_settings,
+        'is_admin': True,
+        'active_menu': 'theme',
+        'form': form,
+    }
+    return render(request, 'core/theme.html', context)
+

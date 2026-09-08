@@ -123,3 +123,12 @@ def payment_add_view(request, pk):
     context['customer'] = customer
     context['form_type'] = 'payment'
     return render(request, 'dues/transaction_form.html', context)
+
+@login_required
+def due_report_view(request):
+    """Date-wise report of every payment RECEIVED from customers."""
+    from .models import DuePayment
+    payments = DuePayment.objects.select_related('customer', 'created_by').all()
+    context = _base_context(request, 'dues')
+    context['payments'] = payments
+    return render(request, 'dues/report.html', context)
