@@ -7,13 +7,16 @@
 
     <!-- Top Welcome Banner -->
     <div style="position:relative; border-radius:16px; overflow:hidden; margin-bottom:28px; height:150px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.dashboard_hero_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.82), rgba(30,58,95,0.5)), url('{{ site_settings.dashboard_hero_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, #0f172a, #1e3a5f);
-            {% endif %}
-        "></div>
+        {% if is_hero_video %}
+            <video autoplay loop muted playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+                <source src="{{ site_settings.dashboard_hero_image.url }}" type="video/mp4">
+            </video>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.6), rgba(30,58,95,0.35));"></div>
+        {% elif site_settings.dashboard_hero_image %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.82), rgba(30,58,95,0.5)), url('{{ site_settings.dashboard_hero_image.url }}') center/cover no-repeat;"></div>
+        {% else %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, #0f172a, #1e3a5f);"></div>
+        {% endif %}
         <div style="position:relative; z-index:2; padding:0 28px; color:#fff;">
             <div style="font-size:20px; font-weight:800;">Welcome back, {{ request.user.username }} 👋</div>
             <div style="font-size:13px; color:#e2e8f0; margin-top:6px;">Here's your business snapshot for {{ today|date:"d M Y" }}</div>
@@ -22,13 +25,16 @@
 
     <!-- Milk Business Section Banner -->
     <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.milk_banner_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.milk_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, #1e3a5f, #3b82f6);
-            {% endif %}
-        "></div>
+        {% if is_milk_video %}
+            <video autoplay loop muted playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+                <source src="{{ site_settings.milk_banner_image.url }}" type="video/mp4">
+            </video>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.55), rgba(30,58,95,0.3));"></div>
+        {% elif site_settings.milk_banner_image %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.milk_banner_image.url }}') center/cover no-repeat;"></div>
+        {% else %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, #1e3a5f, #3b82f6);"></div>
+        {% endif %}
         <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">🥛 Milk Business</div>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:30px;">
@@ -48,13 +54,16 @@
 
     <!-- Travel Agency Section Banner -->
     <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.travel_banner_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.travel_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, #0f172a, #334155);
-            {% endif %}
-        "></div>
+        {% if is_travel_video %}
+            <video autoplay loop muted playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+                <source src="{{ site_settings.travel_banner_image.url }}" type="video/mp4">
+            </video>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.55), rgba(30,58,95,0.3));"></div>
+        {% elif site_settings.travel_banner_image %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.travel_banner_image.url }}') center/cover no-repeat;"></div>
+        {% else %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, #0f172a, #334155);"></div>
+        {% endif %}
         <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">✈️ Travel Agency</div>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:30px;">
@@ -78,13 +87,16 @@
 
     <!-- Expenses Section Banner -->
     <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.expense_banner_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.expense_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, #7f1d1d, #b91c1c);
-            {% endif %}
-        "></div>
+        {% if is_expense_video %}
+            <video autoplay loop muted playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+                <source src="{{ site_settings.expense_banner_image.url }}" type="video/mp4">
+            </video>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.55), rgba(30,58,95,0.3));"></div>
+        {% elif site_settings.expense_banner_image %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, rgba(15,23,42,0.78), rgba(30,58,95,0.4)), url('{{ site_settings.expense_banner_image.url }}') center/cover no-repeat;"></div>
+        {% else %}
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background: linear-gradient(120deg, #7f1d1d, #b91c1c);"></div>
+        {% endif %}
         <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">💳 Expenses</div>
     </div>
     <a href="{% url 'expenses:expense_list' %}" class="card" style="text-decoration:none; display:block; max-width:260px;">

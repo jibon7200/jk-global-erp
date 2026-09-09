@@ -25,8 +25,8 @@ class ThemeForm(forms.ModelForm):
             'managing_director_name': forms.TextInput(attrs={'class': 'form-input'}),
             'logo': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
             'currency_symbol': forms.TextInput(attrs={'class': 'form-input'}),
-            'dashboard_hero_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
-            'milk_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
-            'travel_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
-            'expense_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
+            'dashboard_hero_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*,video/mp4,video/webm'}),
+            'milk_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*,video/mp4,video/webm'}),
+            'travel_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*,video/mp4,video/webm'}),
+            'expense_banner_image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*,video/mp4,video/webm'}),
         }       

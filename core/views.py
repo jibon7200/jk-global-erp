@@ -17,6 +17,17 @@ from .models import SiteSettings
 from .decorators import admin_required
 from .forms import SiteSettingsForm, ThemeForm
 
+def _is_video_file(file_field):
+    """
+    Checks a FileField's filename extension to decide whether to
+    render it as a <video> (mp4/webm) or an <img> (jpg/png/gif,
+    including animated gif — browsers animate those automatically).
+    """
+    if not file_field:
+        return False
+    name = file_field.name.lower()
+    return name.endswith('.mp4') or name.endswith('.webm')
+
 
 @login_required
 def dashboard_view(request):
@@ -51,10 +62,16 @@ def dashboard_view(request):
     # Expenses snapshot
     today_expense_total = Expense.objects.filter(date=today).aggregate(total=Sum('amount'))['total'] or 0
 
+    site_settings = SiteSettings.get_settings()
+
     context = {
-        'site_settings': SiteSettings.get_settings(),
+        'site_settings': site_settings,
         'is_admin': request.user.is_admin_role(),
         'active_menu': 'dashboard',
+        'is_hero_video': _is_video_file(site_settings.dashboard_hero_image),
+        'is_milk_video': _is_video_file(site_settings.milk_banner_image),
+        'is_travel_video': _is_video_file(site_settings.travel_banner_image),
+        'is_expense_video': _is_video_file(site_settings.expense_banner_image),
         'today': today,
         'total_products': total_products,
         'today_purchase_bags': today_purchase_bags,
