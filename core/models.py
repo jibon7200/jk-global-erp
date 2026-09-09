@@ -37,6 +37,11 @@ class SiteSettings(models.Model):
     theme_text_color = models.CharField(max_length=7, default="#0f172a", help_text="Main body text color.")
     theme_background_color = models.CharField(max_length=7, default="#f1f5f9", help_text="Page background color.")
 
+    dashboard_hero_image = models.ImageField(upload_to='banners/', blank=True, null=True, help_text="Top welcome banner background image.")
+    milk_banner_image = models.ImageField(upload_to='banners/', blank=True, null=True, help_text="Milk Business section banner image.")
+    travel_banner_image = models.ImageField(upload_to='banners/', blank=True, null=True, help_text="Travel Agency section banner image.")
+    expense_banner_image = models.ImageField(upload_to='banners/', blank=True, null=True, help_text="Expenses section banner image.")
+
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):

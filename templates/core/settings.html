@@ -39,7 +39,37 @@
                 <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Currency Symbol</label>
                 {{ form.currency_symbol }}
             </div>
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Currency Symbol</label>
+                {{ form.currency_symbol }}
+            </div>
 
+            <hr style="border:none; border-top:1px solid #e2e8f0; margin:26px 0;">
+            <h3 style="font-size:14px; color:#0f172a; margin-bottom:16px;">Dashboard Banner Images</h3>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Top Welcome Banner</label>
+                {% if site_settings.dashboard_hero_image %}<img src="{{ site_settings.dashboard_hero_image.url }}" style="width:100%; max-width:200px; height:60px; object-fit:cover; border-radius:8px; margin-bottom:8px; display:block;">{% endif %}
+                {{ form.dashboard_hero_image }}
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">🥛 Milk Business Section Banner</label>
+                {% if site_settings.milk_banner_image %}<img src="{{ site_settings.milk_banner_image.url }}" style="width:100%; max-width:200px; height:60px; object-fit:cover; border-radius:8px; margin-bottom:8px; display:block;">{% endif %}
+                {{ form.milk_banner_image }}
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">✈️ Travel Agency Section Banner</label>
+                {% if site_settings.travel_banner_image %}<img src="{{ site_settings.travel_banner_image.url }}" style="width:100%; max-width:200px; height:60px; object-fit:cover; border-radius:8px; margin-bottom:8px; display:block;">{% endif %}
+                {{ form.travel_banner_image }}
+            </div>
+
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">💳 Expenses Section Banner</label>
+                {% if site_settings.expense_banner_image %}<img src="{{ site_settings.expense_banner_image.url }}" style="width:100%; max-width:200px; height:60px; object-fit:cover; border-radius:8px; margin-bottom:8px; display:block;">{% endif %}
+                {{ form.expense_banner_image }}
+            </div>
             <button type="submit" style="background:#1e3a5f; color:#fff; padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
                 Save Changes
             </button>
