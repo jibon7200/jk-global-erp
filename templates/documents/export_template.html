@@ -47,13 +47,7 @@
             {% endif %}
         {% endfor %}
 
-        {% for block in blocks %}
-            {% if block.new_text %}
-            <div class="text-block" style="left:{{ block.left }}px; top:{{ block.top }}px; width:{{ block.width }}px; height:{{ block.height }}px; font-size:{{ block.height }}px;">
-                {{ block.new_text }}
-            </div>
-            {% endif %}
-        {% endfor %}
+
     </div>
 </body>
 </html>

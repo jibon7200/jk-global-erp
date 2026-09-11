@@ -42,7 +42,6 @@
         <div id="zoomWrapper" style="transform-origin: top left; display:inline-block;">
             <div id="editorContainer" style="position:relative; display:inline-block;">
                 <img src="{% url 'pdf_editor:page_thumbnail' page_entry.source_file_id page_entry.page_number %}?rotation={{ page_entry.rotation }}&scale=2.0" style="display:block;" id="docImage">
-                <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                 <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>
         </div>
@@ -78,14 +77,14 @@
 
     <script>
         let elements = {{ elements_json|safe }};
-        let textBlocks = {{ text_blocks_json|safe }};
+
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
         const uploadUrl = "{% url 'pdf_editor:page_element_image_upload' project.pk %}";
         const aiAssistUrl = "{% url 'pdf_editor:pdf_ai_assist' project.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        const textLayer = document.getElementById('textLayer');
+
         const elementLayer = document.getElementById('elementLayer');
         const docImage = document.getElementById('docImage');
         const zoomWrapper = document.getElementById('zoomWrapper');
@@ -120,33 +119,7 @@
             return { x: docImage.clientWidth / originalWidth, y: docImage.clientHeight / originalHeight };
         }
 
-        function renderTextBlocks() {
-            textLayer.innerHTML = '';
-            const scale = getScale();
 
-            textBlocks.forEach((block, index) => {
-                if (block.new_text === undefined) block.new_text = '';
-
-                const input = document.createElement('textarea');
-                input.value = block.new_text;
-                input.placeholder = block.text;
-                input.style.position = 'absolute';
-                input.style.left = (block.left * scale.x) + 'px';
-                input.style.top = (block.top * scale.y) + 'px';
-                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
-                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
-                input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
-                input.style.border = '1px dashed #3b82f6';
-                input.style.background = 'transparent';
-                input.style.resize = 'none';
-                input.style.overflow = 'hidden';
-                input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
-                input.style.color = '#dc2626';
-                input.style.padding = '1px';
-                input.addEventListener('input', () => { textBlocks[index].new_text = input.value; });
-                textLayer.appendChild(input);
-            });
-        }
 
         function makeDraggableResizable(el, elData) {
             let isDragging = false, isResizing = false;
@@ -354,7 +327,7 @@
             });
         }
 
-        function renderAll() { renderTextBlocks(); renderElements(); }
+        function renderAll() { renderElements(); }
         docImage.onload = renderAll;
         if (docImage.complete) renderAll();
         window.addEventListener('resize', renderAll);
@@ -413,7 +386,7 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             document.getElementById('elementsJson').value = JSON.stringify(elements);
-            document.getElementById('textBlocksJson').value = JSON.stringify(textBlocks);
+            document.getElementById('textBlocksJson').value = '[]';
             document.getElementById('hiddenForm').submit();
         });
     </script>

@@ -236,15 +236,11 @@ def page_editor_view(request, pk, page_id):
     pixel_width = int(page.rect.width * RENDER_SCALE)
     pixel_height = int(page.rect.height * RENDER_SCALE)
 
-    # Run OCR only ONCE per page (first time it's opened for editing).
-    # After that, the user's edits (including deletions) are preserved
-    # and reloaded — OCR is never re-run over saved edits.
+    # OCR text-line detection has been intentionally disabled.
+    # The PDF page is shown exactly as-is. Editing is done purely
+    # via "Cover" + "Add Text" tools.
     if 'text_blocks' not in page_entry:
-        try:
-            pixmap = page.get_pixmap(matrix=fitz.Matrix(RENDER_SCALE, RENDER_SCALE))
-            page_entry['text_blocks'] = _extract_text_lines_from_pixmap(pixmap)
-        except Exception:
-            page_entry['text_blocks'] = []
+        page_entry['text_blocks'] = []
         project.save()
 
     doc.close()

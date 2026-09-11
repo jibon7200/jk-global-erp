@@ -94,14 +94,16 @@ def document_upload_view(request):
             doc = DocumentEdit(original_image=form.cleaned_data['image'], created_by=request.user)
             doc.save()
 
-            try:
-                blocks, _, _ = _extract_text_blocks(doc.original_image.path)
-                doc.detected_blocks = blocks
-                doc.edited_blocks = blocks  # starts as a copy; user edits this
-                doc.save()
-                messages.success(request, f'{len(blocks)} text lines detected. You can now edit them.')
-            except Exception as e:
-                messages.error(request, f'OCR text detection failed: {e}. You can still add text manually.')
+            # OCR text-line detection has been intentionally disabled.
+            # The uploaded image is shown exactly as-is. Editing is
+            # done purely via "Cover" (paint over an area) + "Add Text"
+            # (type new text on top) — this avoids any risk of
+            # detected-text overlay visually doubling with the
+            # original image text.
+            doc.detected_blocks = []
+            doc.edited_blocks = []
+            doc.save()
+            messages.success(request, 'Image uploaded. Use "Cover" to hide any text, then "Add Text" to write new text.')
 
             return redirect('documents:document_edit', pk=doc.pk)
     else:
