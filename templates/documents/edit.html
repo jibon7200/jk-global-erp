@@ -11,7 +11,6 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Toolbar -->
     <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
         <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:9px 16px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 Save</button>
         <a href="{% url 'documents:document_export' doc.pk %}" style="background:#15803d; color:#fff; padding:9px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:600;">⬇ Export PDF</a>
@@ -36,13 +35,14 @@
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:9px 14px; border-radius:8px; margin-bottom:14px; font-size:11px;">
-        ⚠️ Each box has its own mini toolbar (rotate, opacity, duplicate, layer order) shown above it when you add or click it. Ctrl+Z also undoes.
+        ⚠️ Use "Cover" then click "✓ Erase" to permanently hide the content underneath, then "Add Text" on top. Ctrl+Z undoes.
     </div>
 
     <div class="card" style="overflow:auto; max-height:75vh; padding:20px;">
         <div id="zoomWrapper" style="transform-origin: top left; display:inline-block;">
             <div id="editorContainer" style="position:relative; display:inline-block;">
                 <img src="{{ doc.original_image.url }}" style="display:block;" id="docImage">
+                <div id="textLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                 <div id="elementLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>
         </div>
@@ -53,7 +53,7 @@
         <div style="background:#fff; border-radius:14px; padding:26px; width:90%; max-width:520px; max-height:85vh; overflow-y:auto;">
             <h3 style="font-size:16px; color:#0f172a; margin-bottom:14px;">✨ Ask AI (Google Gemini)</h3>
             <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">What do you want AI to do?</label>
-            <textarea id="aiInstruction" placeholder="e.g. Write a formal paragraph in Bangla about our milk business" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
+            <textarea id="aiInstruction" placeholder="e.g. Write a formal paragraph in Bangla about our milk business growth" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
             <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:5px;">Existing text (optional)</label>
             <textarea id="aiContextText" style="width:100%; height:70px; padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; margin-bottom:12px; resize:vertical;"></textarea>
             <button id="aiGenerateBtn" type="button" style="background:#7c3aed; color:#fff; padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Generate</button>
@@ -77,7 +77,7 @@
     </form>
 
     <script>
-
+        const blocks = {{ blocks_json|safe }};
         let elements = {{ elements_json|safe }};
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
@@ -85,7 +85,7 @@
         const aiAssistUrl = "{% url 'documents:document_ai_assist' doc.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-
+        const textLayer = document.getElementById('textLayer');
         const elementLayer = document.getElementById('elementLayer');
         const docImage = document.getElementById('docImage');
         const zoomWrapper = document.getElementById('zoomWrapper');
@@ -98,13 +98,11 @@
             undoStack.push(JSON.stringify(elements));
             if (undoStack.length > 30) undoStack.shift();
         }
-
         function undo() {
             if (undoStack.length === 0) return;
             elements = JSON.parse(undoStack.pop());
             renderElements();
         }
-
         document.getElementById('undoBtn').addEventListener('click', undo);
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
@@ -122,7 +120,30 @@
             return { x: docImage.clientWidth / originalWidth, y: docImage.clientHeight / originalHeight };
         }
 
-
+        function renderTextBoxes() {
+            textLayer.innerHTML = '';
+            const scale = getScale();
+            blocks.forEach((block, index) => {
+                const input = document.createElement('textarea');
+                input.value = block.text;
+                input.style.position = 'absolute';
+                input.style.left = (block.left * scale.x) + 'px';
+                input.style.top = (block.top * scale.y) + 'px';
+                input.style.width = Math.max(block.width * scale.x, 40) + 'px';
+                input.style.height = Math.max(block.height * scale.y, 18) + 'px';
+                input.style.fontSize = Math.max((block.height * scale.y) * 0.75, 10) + 'px';
+                input.style.border = '1px solid transparent';
+                input.style.background = 'transparent';
+                input.style.resize = 'none';
+                input.style.overflow = 'hidden';
+                input.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+                input.style.padding = '1px';
+                input.addEventListener('focus', () => { input.style.border = '1px dashed #3b82f6'; });
+                input.addEventListener('blur', () => { input.style.border = '1px solid transparent'; });
+                input.addEventListener('input', () => { blocks[index].text = input.value; });
+                textLayer.appendChild(input);
+            });
+        }
 
         function makeDraggableResizable(el, elData) {
             let isDragging = false, isResizing = false;
@@ -178,15 +199,13 @@
             bar.style.cssText = 'position:absolute; top:-26px; right:0; display:flex; gap:2px; z-index:6;';
 
             const rotateBtn = document.createElement('button');
-            rotateBtn.type = 'button'; rotateBtn.textContent = '🔄';
-            rotateBtn.title = 'Rotate 90°';
+            rotateBtn.type = 'button'; rotateBtn.textContent = '🔄'; rotateBtn.title = 'Rotate 90°';
             rotateBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
             rotateBtn.addEventListener('mousedown', (e) => e.stopPropagation());
             rotateBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elData.rotation = ((elData.rotation || 0) + 90) % 360; renderElements(); });
 
             const dupBtn = document.createElement('button');
-            dupBtn.type = 'button'; dupBtn.textContent = '⧉';
-            dupBtn.title = 'Duplicate';
+            dupBtn.type = 'button'; dupBtn.textContent = '⧉'; dupBtn.title = 'Duplicate';
             dupBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
             dupBtn.addEventListener('mousedown', (e) => e.stopPropagation());
             dupBtn.addEventListener('click', (e) => {
@@ -198,26 +217,16 @@
             });
 
             const frontBtn = document.createElement('button');
-            frontBtn.type = 'button'; frontBtn.textContent = '⬆';
-            frontBtn.title = 'Bring to front';
+            frontBtn.type = 'button'; frontBtn.textContent = '⬆'; frontBtn.title = 'Bring to front';
             frontBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
             frontBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            frontBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); pushUndo();
-                elements.splice(index, 1); elements.push(elData);
-                renderElements();
-            });
+            frontBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elements.splice(index, 1); elements.push(elData); renderElements(); });
 
             const backBtn = document.createElement('button');
-            backBtn.type = 'button'; backBtn.textContent = '⬇';
-            backBtn.title = 'Send to back';
+            backBtn.type = 'button'; backBtn.textContent = '⬇'; backBtn.title = 'Send to back';
             backBtn.style.cssText = 'font-size:11px; padding:2px 5px; border:none; border-radius:3px; background:#334155; color:#fff; cursor:pointer;';
             backBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            backBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); pushUndo();
-                elements.splice(index, 1); elements.unshift(elData);
-                renderElements();
-            });
+            backBtn.addEventListener('click', (e) => { e.stopPropagation(); pushUndo(); elements.splice(index, 1); elements.unshift(elData); renderElements(); });
 
             const opacityInput = document.createElement('input');
             opacityInput.type = 'range'; opacityInput.min = '10'; opacityInput.max = '100';
@@ -225,10 +234,7 @@
             opacityInput.title = 'Opacity';
             opacityInput.style.cssText = 'width:50px; vertical-align:middle;';
             opacityInput.addEventListener('mousedown', (e) => e.stopPropagation());
-            opacityInput.addEventListener('input', (e) => {
-                elData.opacity = e.target.value / 100;
-                box.style.opacity = elData.opacity;
-            });
+            opacityInput.addEventListener('input', (e) => { elData.opacity = e.target.value / 100; box.style.opacity = elData.opacity; });
 
             bar.appendChild(rotateBtn); bar.appendChild(dupBtn); bar.appendChild(frontBtn); bar.appendChild(backBtn); bar.appendChild(opacityInput);
             box.appendChild(bar);
@@ -262,21 +268,36 @@
                     box.appendChild(img);
                 } else if (elData.type === 'cover') {
                     if (!elData.color) elData.color = '#ffffff';
+                    if (elData.confirmed === undefined) elData.confirmed = false;
                     box.style.background = elData.color;
-                    box.style.border = '2px dashed #94a3b8';
+                    box.style.border = elData.confirmed ? 'none' : '2px dashed #64748b';
+                    box.style.opacity = elData.confirmed ? elData.opacity : Math.min(elData.opacity, 0.78);
+
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.title = 'Cover color';
+                    colorPicker.style.cssText = 'position:absolute; top:-30px; left:0; width:28px; height:24px; border:2px solid #64748b; border-radius:4px; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
                     box.appendChild(colorPicker);
+
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.type = 'button';
+                    confirmBtn.textContent = elData.confirmed ? '✓ Erased' : '✓ Erase';
+                    confirmBtn.title = 'Click to finalize erasing the content underneath';
+                    confirmBtn.style.cssText = `position:absolute; top:-30px; left:36px; font-size:11px; padding:4px 10px; border:none; border-radius:4px; cursor:pointer; z-index:6; background:${elData.confirmed ? '#15803d' : '#334155'}; color:#fff; font-weight:700;`;
+                    confirmBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    confirmBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.confirmed = !elData.confirmed; renderElements(); });
+                    box.appendChild(confirmBtn);
                 } else if (elData.type === 'rect' || elData.type === 'circle') {
                     if (!elData.color) elData.color = '#3b82f6';
                     box.style.background = elData.color;
                     box.style.borderRadius = elData.type === 'circle' ? '50%' : '0';
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
                     box.appendChild(colorPicker);
@@ -287,14 +308,18 @@
                     lineDiv.style.cssText = `width:100%; height:4px; background:${elData.color}; margin-top:${(elData.height * scale.y / 2) - 2}px;`;
                     box.appendChild(lineDiv);
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; lineDiv.style.background = elData.color; });
                     box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
-                    box.style.border = '1px dashed #0891b2';
-                    box.style.background = 'rgba(255,255,255,0.6)';
+                    if (elData.bold === undefined) elData.bold = false;
+                    if (elData.align === undefined) elData.align = 'left';
+                    box.style.border = 'none';
+                    box.style.background = 'transparent';
+
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
                     textInput.placeholder = 'Type here...';
@@ -304,26 +329,56 @@
                     textInput.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
                     textInput.style.fontSize = (elData.font_size || 16) + 'px';
                     textInput.style.color = elData.color || '#000000';
+                    textInput.style.fontWeight = elData.bold ? '700' : '400';
+                    textInput.style.textAlign = elData.align;
                     textInput.style.padding = '2px';
                     textInput.addEventListener('mousedown', (e) => e.stopPropagation());
                     textInput.addEventListener('input', () => { elData.text = textInput.value; });
                     box.appendChild(textInput);
 
                     const fontControls = document.createElement('div');
-                    fontControls.style.cssText = 'position:absolute; top:-26px; left:0; display:flex; gap:2px; background:#0891b2; border-radius:5px; padding:2px; z-index:6;';
-                    const decBtn = document.createElement('button'); decBtn.type='button'; decBtn.textContent='A−';
-                    decBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:2px; background:#0f172a; border-radius:5px; padding:3px; flex-wrap:wrap; max-width:280px; z-index:6;';
+
+                    const decBtn = document.createElement('button'); decBtn.type='button'; decBtn.textContent='A−'; decBtn.title='Smaller';
+                    decBtn.style.cssText = 'font-size:10px; font-weight:700; padding:2px 6px; border:none; border-radius:3px; background:#fff; color:#000; cursor:pointer;';
                     decBtn.addEventListener('mousedown', (e) => e.stopPropagation());
                     decBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.max((elData.font_size||16)-2,8); textInput.style.fontSize = elData.font_size+'px'; });
-                    const incBtn = document.createElement('button'); incBtn.type='button'; incBtn.textContent='A+';
-                    incBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+
+                    const incBtn = document.createElement('button'); incBtn.type='button'; incBtn.textContent='A+'; incBtn.title='Bigger';
+                    incBtn.style.cssText = 'font-size:10px; font-weight:700; padding:2px 6px; border:none; border-radius:3px; background:#fff; color:#000; cursor:pointer;';
                     incBtn.addEventListener('mousedown', (e) => e.stopPropagation());
                     incBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.min((elData.font_size||16)+2,100); textInput.style.fontSize = elData.font_size+'px'; });
-                    const txtColor = document.createElement('input'); txtColor.type='color'; txtColor.value = elData.color||'#000000';
-                    txtColor.style.cssText = 'width:20px; height:20px; border:none; padding:0; cursor:pointer;';
-                    txtColor.addEventListener('mousedown', (e) => e.stopPropagation());
-                    txtColor.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
-                    fontControls.appendChild(decBtn); fontControls.appendChild(incBtn); fontControls.appendChild(txtColor);
+
+                    const boldBtn = document.createElement('button'); boldBtn.type='button'; boldBtn.textContent='B'; boldBtn.title='Bold';
+                    boldBtn.style.cssText = `font-size:12px; font-weight:900; padding:2px 9px; border:none; border-radius:3px; cursor:pointer; background:${elData.bold ? '#fbbf24' : '#fff'}; color:#000;`;
+                    boldBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    boldBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.bold = !elData.bold; textInput.style.fontWeight = elData.bold ? '700' : '400'; boldBtn.style.background = elData.bold ? '#fbbf24' : '#fff'; });
+
+                    const alignLeftBtn = document.createElement('button'); alignLeftBtn.type='button'; alignLeftBtn.textContent='⬅'; alignLeftBtn.title='Align Left';
+                    alignLeftBtn.style.cssText = `font-size:11px; padding:2px 7px; border:none; border-radius:3px; cursor:pointer; background:${elData.align === 'left' ? '#fbbf24' : '#fff'}; color:#000;`;
+                    alignLeftBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignLeftBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'left'; textInput.style.textAlign = 'left'; renderElements(); });
+
+                    const alignCenterBtn = document.createElement('button'); alignCenterBtn.type='button'; alignCenterBtn.textContent='⬍'; alignCenterBtn.title='Align Center';
+                    alignCenterBtn.style.cssText = `font-size:11px; padding:2px 7px; border:none; border-radius:3px; cursor:pointer; background:${elData.align === 'center' ? '#fbbf24' : '#fff'}; color:#000;`;
+                    alignCenterBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignCenterBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'center'; textInput.style.textAlign = 'center'; renderElements(); });
+
+                    const alignRightBtn = document.createElement('button'); alignRightBtn.type='button'; alignRightBtn.textContent='➡'; alignRightBtn.title='Align Right';
+                    alignRightBtn.style.cssText = `font-size:11px; padding:2px 7px; border:none; border-radius:3px; cursor:pointer; background:${elData.align === 'right' ? '#fbbf24' : '#fff'}; color:#000;`;
+                    alignRightBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignRightBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'right'; textInput.style.textAlign = 'right'; renderElements(); });
+
+                    const textColorPicker = document.createElement('input');
+                    textColorPicker.type = 'color';
+                    textColorPicker.value = elData.color || '#000000';
+                    textColorPicker.style.cssText = 'width:22px; height:22px; border:none; padding:0; cursor:pointer;';
+                    textColorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    textColorPicker.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
+
+                    fontControls.appendChild(decBtn); fontControls.appendChild(incBtn); fontControls.appendChild(boldBtn);
+                    fontControls.appendChild(alignLeftBtn); fontControls.appendChild(alignCenterBtn); fontControls.appendChild(alignRightBtn);
+                    fontControls.appendChild(textColorPicker);
                     box.appendChild(fontControls);
                 }
 
@@ -345,7 +400,7 @@
             });
         }
 
-        function renderAll() { renderElements(); }
+        function renderAll() { renderTextBoxes(); renderElements(); }
         docImage.onload = renderAll;
         if (docImage.complete) renderAll();
         window.addEventListener('resize', renderAll);
@@ -363,7 +418,7 @@
             e.target.value = '';
         });
 
-        document.getElementById('addCoverBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'cover', left: 50, top: 50, width: 150, height: 60, color: '#ffffff' }); renderElements(); });
+        document.getElementById('addCoverBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'cover', left: 50, top: 50, width: 150, height: 60, color: '#ffffff', confirmed: false }); renderElements(); });
         document.getElementById('addTextBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'text', text: '', left: 50, top: 50, width: 180, height: 40, font_size: 16, color: '#000000' }); renderElements(); });
         document.getElementById('addRectBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'rect', left: 50, top: 50, width: 120, height: 80, color: '#3b82f6' }); renderElements(); });
         document.getElementById('addCircleBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'circle', left: 50, top: 50, width: 100, height: 100, color: '#3b82f6' }); renderElements(); });
@@ -403,7 +458,7 @@
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
-            document.getElementById('editedBlocksJson').value = '[]';
+            document.getElementById('editedBlocksJson').value = JSON.stringify(blocks);
             document.getElementById('addedElementsJson').value = JSON.stringify(elements);
             document.getElementById('hiddenForm').submit();
         });

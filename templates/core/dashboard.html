@@ -5,8 +5,8 @@
 
 {% block content %}
 
-    <!-- Top Welcome Banner -->
-    <div style="position:relative; border-radius:16px; overflow:hidden; margin-bottom:28px; height:150px; display:flex; align-items:center;">
+    <!-- Top Welcome Banner (only banner with an image) -->
+    <div style="position:relative; border-radius:16px; overflow:hidden; margin-bottom:28px; height:170px; display:flex; align-items:center;">
         <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
             {% if site_settings.dashboard_hero_image %}
                 background: linear-gradient(120deg, rgba(15,23,42,0.8), rgba(30,58,95,0.45)), url('{{ site_settings.dashboard_hero_image.url }}') center/cover no-repeat;
@@ -14,22 +14,15 @@
                 background: linear-gradient(120deg, rgba(15,23,42,0.8), rgba(30,58,95,0.45)), url('https://images.pexels.com/photos/16737434/pexels-photo-16737434.jpeg') center/cover no-repeat;
             {% endif %}
         "></div>
-        <div style="position:relative; z-index:2; padding:0 28px; color:#fff;">
-            <div style="font-size:20px; font-weight:800;">Welcome back, {{ request.user.username }} 👋</div>
-            <div style="font-size:13px; color:#e2e8f0; margin-top:6px;">Here's your business snapshot for {{ today|date:"d M Y" }}</div>
+        <div style="position:relative; z-index:2; padding:0 32px; color:#fff;">
+            <div style="font-size:28px; font-weight:800;">Welcome back, {{ request.user.username }} 👋</div>
+            <div style="font-size:16px; color:#e2e8f0; margin-top:8px; font-weight:600;">Here's your business snapshot for {{ today|date:"d M Y" }}</div>
         </div>
     </div>
 
-    <!-- Milk Business Section Banner -->
-    <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.milk_banner_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.68), rgba(30,58,95,0.4)), url('{{ site_settings.milk_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.68), rgba(30,58,95,0.4)), url('https://images.pexels.com/photos/4487361/pexels-photo-4487361.jpeg') center/cover no-repeat;
-            {% endif %}
-        "></div>
-        <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">🥛 Milk Business</div>
+    <!-- Milk Business Section Banner — plain color, no image -->
+    <div style="border-radius:14px; margin-bottom:14px; height:60px; display:flex; align-items:center; padding:0 20px; background: linear-gradient(120deg, #1e3a5f, #3b82f6);">
+        <div style="color:#fff; font-size:18px; font-weight:800;">🥛 Milk Business</div>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:30px;">
         <a href="{% url 'milk:stock' %}" class="card" style="text-decoration:none; display:block;">
@@ -46,16 +39,9 @@
         </a>
     </div>
 
-    <!-- Travel Agency Section Banner -->
-    <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.travel_banner_image %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.68), rgba(30,58,95,0.4)), url('{{ site_settings.travel_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, rgba(15,23,42,0.68), rgba(30,58,95,0.4)), url('https://images.pexels.com/photos/16737434/pexels-photo-16737434.jpeg') center/cover no-repeat;
-            {% endif %}
-        "></div>
-        <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">✈️ Travel Agency</div>
+    <!-- Travel Agency Section Banner — plain color, no image -->
+    <div style="border-radius:14px; margin-bottom:14px; height:60px; display:flex; align-items:center; padding:0 20px; background: linear-gradient(120deg, #0f172a, #334155);">
+        <div style="color:#fff; font-size:18px; font-weight:800;">✈️ Travel Agency</div>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:30px;">
         <a href="{% url 'travel:ticket_list' %}" class="card" style="text-decoration:none; display:block;">
@@ -76,16 +62,9 @@
         </a>
     </div>
 
-    <!-- Expenses Section Banner -->
-    <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:14px; height:70px; display:flex; align-items:center;">
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;
-            {% if site_settings.expense_banner_image %}
-                background: linear-gradient(120deg, rgba(127,29,29,0.6), rgba(185,28,28,0.4)), url('{{ site_settings.expense_banner_image.url }}') center/cover no-repeat;
-            {% else %}
-                background: linear-gradient(120deg, rgba(127,29,29,0.6), rgba(185,28,28,0.4)), url('https://images.pexels.com/photos/16098005/pexels-photo-16098005.jpeg') center/cover no-repeat;
-            {% endif %}
-        "></div>
-        <div style="position:relative; z-index:2; padding:0 20px; color:#fff; font-size:14px; font-weight:800;">💳 Expenses</div>
+    <!-- Expenses Section Banner — plain color, no image -->
+    <div style="border-radius:14px; margin-bottom:14px; height:60px; display:flex; align-items:center; padding:0 20px; background: linear-gradient(120deg, #7f1d1d, #b91c1c);">
+        <div style="color:#fff; font-size:18px; font-weight:800;">💳 Expenses</div>
     </div>
     <a href="{% url 'expenses:expense_list' %}" class="card" style="text-decoration:none; display:block; max-width:260px;">
         <div style="font-size:11px; color:#64748b; font-weight:600;">TODAY'S EXPENSE TOTAL</div>

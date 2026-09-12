@@ -11,7 +11,6 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Toolbar -->
     <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
         <a href="{% url 'pdf_editor:project_edit' project.pk %}" style="background:#e2e8f0; color:#334155; padding:9px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:600;">← Back to Pages</a>
         <button id="saveBtn" style="background:#1e3a5f; color:#fff; padding:9px 16px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 Save Page</button>
@@ -35,7 +34,7 @@
     </div>
 
     <div style="background:#fef3c7; color:#92400e; padding:9px 14px; border-radius:8px; margin-bottom:14px; font-size:11px;">
-        ⚠️ Each box has its own mini toolbar (rotate, opacity, duplicate, layer order) shown above it. Use "Cover" first to hide original content, then add text/shapes on top. Ctrl+Z also undoes.
+        ⚠️ Use "Cover" then "✓ Erase" to permanently hide content underneath, then "Add Text" on top. Ctrl+Z undoes.
     </div>
 
     <div class="card" style="overflow:auto; max-height:75vh; padding:20px;">
@@ -72,18 +71,15 @@
     <form id="hiddenForm" method="post" style="display:none;">
         {% csrf_token %}
         <input type="hidden" name="elements_json" id="elementsJson">
-        <input type="hidden" name="text_blocks_json" id="textBlocksJson">
     </form>
 
     <script>
         let elements = {{ elements_json|safe }};
-
         const originalWidth = {{ image_width }};
         const originalHeight = {{ image_height }};
         const uploadUrl = "{% url 'pdf_editor:page_element_image_upload' project.pk %}";
         const aiAssistUrl = "{% url 'pdf_editor:pdf_ai_assist' project.pk %}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
 
         const elementLayer = document.getElementById('elementLayer');
         const docImage = document.getElementById('docImage');
@@ -118,8 +114,6 @@
         function getScale() {
             return { x: docImage.clientWidth / originalWidth, y: docImage.clientHeight / originalHeight };
         }
-
-
 
         function makeDraggableResizable(el, elData) {
             let isDragging = false, isResizing = false;
@@ -244,21 +238,35 @@
                     box.appendChild(img);
                 } else if (elData.type === 'cover') {
                     if (!elData.color) elData.color = '#ffffff';
+                    if (elData.confirmed === undefined) elData.confirmed = false;
                     box.style.background = elData.color;
-                    box.style.border = '2px dashed #94a3b8';
+                    box.style.border = 'none';
+                    box.style.opacity = elData.confirmed ? elData.opacity : Math.min(elData.opacity, 0.55);
+
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:28px; height:22px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
                     box.appendChild(colorPicker);
+
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.type = 'button';
+                    confirmBtn.textContent = elData.confirmed ? '✓ Erased' : '✓ Erase';
+                    confirmBtn.title = 'Click to finalize erasing the content underneath';
+                    confirmBtn.style.cssText = `position:absolute; top:-28px; left:34px; font-size:10px; padding:3px 8px; border:none; border-radius:4px; cursor:pointer; z-index:6; background:${elData.confirmed ? '#15803d' : '#e2e8f0'}; color:${elData.confirmed ? '#fff' : '#334155'}; font-weight:700;`;
+                    confirmBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    confirmBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.confirmed = !elData.confirmed; renderElements(); });
+                    box.appendChild(confirmBtn);
                 } else if (elData.type === 'rect' || elData.type === 'circle') {
                     if (!elData.color) elData.color = '#3b82f6';
                     box.style.background = elData.color;
                     box.style.borderRadius = elData.type === 'circle' ? '50%' : '0';
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; box.style.background = elData.color; });
                     box.appendChild(colorPicker);
@@ -269,14 +277,18 @@
                     lineDiv.style.cssText = `width:100%; height:4px; background:${elData.color}; margin-top:${(elData.height * scale.y / 2) - 2}px;`;
                     box.appendChild(lineDiv);
                     const colorPicker = document.createElement('input');
-                    colorPicker.type = 'color'; colorPicker.value = elData.color;
-                    colorPicker.style.cssText = 'position:absolute; top:-26px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
+                    colorPicker.type = 'color';
+                    colorPicker.value = elData.color;
+                    colorPicker.style.cssText = 'position:absolute; top:-28px; left:0; width:30px; height:20px; border:none; padding:0; cursor:pointer; z-index:6;';
                     colorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
                     colorPicker.addEventListener('input', (e) => { elData.color = e.target.value; lineDiv.style.background = elData.color; });
                     box.appendChild(colorPicker);
                 } else if (elData.type === 'text') {
-                    box.style.border = '1px dashed #0891b2';
-                    box.style.background = 'rgba(255,255,255,0.6)';
+                    if (elData.bold === undefined) elData.bold = false;
+                    if (elData.align === undefined) elData.align = 'left';
+                    box.style.border = 'none';
+                    box.style.background = 'transparent';
+
                     const textInput = document.createElement('textarea');
                     textInput.value = elData.text || '';
                     textInput.placeholder = 'Type here...';
@@ -286,26 +298,56 @@
                     textInput.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
                     textInput.style.fontSize = (elData.font_size || 16) + 'px';
                     textInput.style.color = elData.color || '#000000';
+                    textInput.style.fontWeight = elData.bold ? '700' : '400';
+                    textInput.style.textAlign = elData.align;
                     textInput.style.padding = '2px';
                     textInput.addEventListener('mousedown', (e) => e.stopPropagation());
                     textInput.addEventListener('input', () => { elData.text = textInput.value; });
                     box.appendChild(textInput);
 
                     const fontControls = document.createElement('div');
-                    fontControls.style.cssText = 'position:absolute; top:-26px; left:0; display:flex; gap:2px; background:#0891b2; border-radius:5px; padding:2px; z-index:6;';
-                    const decBtn = document.createElement('button'); decBtn.type='button'; decBtn.textContent='A−';
+                    fontControls.style.cssText = 'position:absolute; top:-28px; left:0; display:flex; gap:2px; background:#0891b2; border-radius:5px; padding:2px; flex-wrap:wrap; max-width:280px; z-index:6;';
+
+                    const decBtn = document.createElement('button'); decBtn.type='button'; decBtn.textContent='A−'; decBtn.title='Smaller';
                     decBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
                     decBtn.addEventListener('mousedown', (e) => e.stopPropagation());
                     decBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.max((elData.font_size||16)-2,8); textInput.style.fontSize = elData.font_size+'px'; });
-                    const incBtn = document.createElement('button'); incBtn.type='button'; incBtn.textContent='A+';
+
+                    const incBtn = document.createElement('button'); incBtn.type='button'; incBtn.textContent='A+'; incBtn.title='Bigger';
                     incBtn.style.cssText = 'font-size:10px; padding:2px 5px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
                     incBtn.addEventListener('mousedown', (e) => e.stopPropagation());
                     incBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.font_size = Math.min((elData.font_size||16)+2,100); textInput.style.fontSize = elData.font_size+'px'; });
-                    const txtColor = document.createElement('input'); txtColor.type='color'; txtColor.value = elData.color||'#000000';
-                    txtColor.style.cssText = 'width:20px; height:20px; border:none; padding:0; cursor:pointer;';
-                    txtColor.addEventListener('mousedown', (e) => e.stopPropagation());
-                    txtColor.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
-                    fontControls.appendChild(decBtn); fontControls.appendChild(incBtn); fontControls.appendChild(txtColor);
+
+                    const boldBtn = document.createElement('button'); boldBtn.type='button'; boldBtn.textContent='B'; boldBtn.title='Bold';
+                    boldBtn.style.cssText = `font-size:11px; font-weight:900; padding:2px 8px; border:none; border-radius:3px; cursor:pointer; background:${elData.bold ? '#0f172a' : '#fff'}; color:${elData.bold ? '#fff' : '#000'};`;
+                    boldBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    boldBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.bold = !elData.bold; textInput.style.fontWeight = elData.bold ? '700' : '400'; boldBtn.style.background = elData.bold ? '#0f172a' : '#fff'; boldBtn.style.color = elData.bold ? '#fff' : '#000'; });
+
+                    const alignLeftBtn = document.createElement('button'); alignLeftBtn.type='button'; alignLeftBtn.textContent='⬅'; alignLeftBtn.title='Align Left';
+                    alignLeftBtn.style.cssText = 'font-size:10px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    alignLeftBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignLeftBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'left'; textInput.style.textAlign = 'left'; });
+
+                    const alignCenterBtn = document.createElement('button'); alignCenterBtn.type='button'; alignCenterBtn.textContent='⬍'; alignCenterBtn.title='Align Center';
+                    alignCenterBtn.style.cssText = 'font-size:10px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    alignCenterBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignCenterBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'center'; textInput.style.textAlign = 'center'; });
+
+                    const alignRightBtn = document.createElement('button'); alignRightBtn.type='button'; alignRightBtn.textContent='➡'; alignRightBtn.title='Align Right';
+                    alignRightBtn.style.cssText = 'font-size:10px; padding:2px 6px; border:none; border-radius:3px; background:#fff; cursor:pointer;';
+                    alignRightBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    alignRightBtn.addEventListener('click', (e) => { e.stopPropagation(); elData.align = 'right'; textInput.style.textAlign = 'right'; });
+
+                    const textColorPicker = document.createElement('input');
+                    textColorPicker.type = 'color';
+                    textColorPicker.value = elData.color || '#000000';
+                    textColorPicker.style.cssText = 'width:20px; height:20px; border:none; padding:0; cursor:pointer;';
+                    textColorPicker.addEventListener('mousedown', (e) => e.stopPropagation());
+                    textColorPicker.addEventListener('input', (e) => { elData.color = e.target.value; textInput.style.color = elData.color; });
+
+                    fontControls.appendChild(decBtn); fontControls.appendChild(incBtn); fontControls.appendChild(boldBtn);
+                    fontControls.appendChild(alignLeftBtn); fontControls.appendChild(alignCenterBtn); fontControls.appendChild(alignRightBtn);
+                    fontControls.appendChild(textColorPicker);
                     box.appendChild(fontControls);
                 }
 
@@ -345,7 +387,7 @@
             e.target.value = '';
         });
 
-        document.getElementById('addCoverBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'cover', left: 50, top: 50, width: 200, height: 80, color: '#ffffff' }); renderElements(); });
+        document.getElementById('addCoverBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'cover', left: 50, top: 50, width: 200, height: 80, color: '#ffffff', confirmed: false }); renderElements(); });
         document.getElementById('addTextBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'text', text: '', left: 50, top: 50, width: 240, height: 50, font_size: 20, color: '#000000' }); renderElements(); });
         document.getElementById('addRectBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'rect', left: 50, top: 50, width: 150, height: 100, color: '#3b82f6' }); renderElements(); });
         document.getElementById('addCircleBtn').addEventListener('click', () => { pushUndo(); elements.push({ type: 'circle', left: 50, top: 50, width: 120, height: 120, color: '#3b82f6' }); renderElements(); });
@@ -386,7 +428,6 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             document.getElementById('elementsJson').value = JSON.stringify(elements);
-            document.getElementById('textBlocksJson').value = '[]';
             document.getElementById('hiddenForm').submit();
         });
     </script>
