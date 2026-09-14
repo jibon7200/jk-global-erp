@@ -21,6 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV TESSERACT_CMD_PATH=/usr/bin/tesseract
+ENV SECRET_KEY=dummy-key-only-used-during-docker-build-not-in-production
+ENV DEBUG=False
+ENV ALLOWED_HOSTS=localhost
 
 RUN python manage.py collectstatic --noinput
 
