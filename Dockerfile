@@ -19,6 +19,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+RUN ls -la static/css/ || echo "STATIC FOLDER MISSING"
 
 RUN echo "=== Checking static folder ===" && ls -la /app/static/ && ls -la /app/static/css/ || echo "STATIC FOLDER NOT FOUND"
 
